@@ -16,19 +16,21 @@ import pandas as pd
 pd.set_option("display.max_rows", None, "display.max_columns", None)
 import shutil
 import csv
+from csv import reader
 from bs4 import BeautifulSoup as bs #https://medium.com/ymedialabs-innovation/web-scraping-using-beautiful-soup-and-selenium-for-dynamic-page-2f8ad15efe25
 
 
 
 
 # Global variables and start Parameters
-chrome_driver = "F:/LeagueStats/scraping/LeagueMatchDataScraping/chromedriver.exe" # location of chrome driver
+chrome_driver = "F:/LeagueStats/scraping/MatchHistoryScraping/chromedriver.exe" # location of chrome driver
 driver = webdriver.Chrome(chrome_driver) # open chrome
 
 
-urldf = pd.read_csv(r"F:/LeagueStats/scraping/LeagueMatchDataScraping/URL.csv") # this includes the URLS for all games that have regular, accessible, matchhistory URLs.
-urllist = 'https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT05/1390263?gameHash=11c29bbfef59b453&amp;tab=overview' #urldf['url'].astype(str).tolist()
-destinationFolder = Path(r"F:/LeagueStats/scraping/LeagueMatchDataScraping/downloads") #this will be used in later production
+#urldf = pd.read_csv(r"F:/LeagueStats/scraping/MatchHistoryScraping/URL.csv") # this includes the URLS for all games that have regular, accessible, matchhistory URLs.
+urldf = pd.read_csv(r"F:/LeagueStats/scraping/MatchHistoryScraping/testURL.csv") # this includes the URLS for all games that have regular, accessible, matchhistory URLs.
+urllist = urldf['url'].astype(str).tolist()
+destinationFolder = Path(r"F:/LeagueStats/scraping/MatchHistoryScraping/downloads") #this might be used in later production
 riot_login_url = ''
 
 #This is a selenium variable created to wait 20 seconds until pages load.
@@ -37,7 +39,7 @@ wait = WebDriverWait(driver, 20)
 
 
 ###
-mainDirectory = Path(r"F:/LeagueStats/scraping/LeagueMatchDataScraping/")
+mainDirectory = Path(r"F:/LeagueStats/scraping/MatchHistoryScraping/")
 pw_directory = Path(r"C:/Users/sam/Documents/riotpw.txt")
 ###
 
@@ -136,7 +138,14 @@ def build_dataframe(raw_table, champlist):
     
 def write_to_csv(dataframe):
     print('write_to_csv running')
-    dataframe.to_csv(r'F:/LeagueStats/scraping/game_data.csv', index=False, header=True) # print to our csv
+    dataframe.to_csv(r'F:/LeagueStats/scraping/MatchHistoryScraping/game_data.csv', index=False, header=True) # print to our csv
+
+def combine_csv(match_file, database_file):
+    print('combining csv')
+    skip_row=[0]
+    match_data_container = pd.read_csv(match_file, header=0, skiprows=skip_row, delimiter=',',encoding="utf-8-sig")
+    match_data_container.to_csv(database_file, mode="a", index=False)
+
 
 
 #TO DO LIST
@@ -151,17 +160,16 @@ def write_to_csv(dataframe):
 
 #Actual function flow starts here
 #iterate through url list
-url_count = 1
+url_count = 0
 for url in urllist:
-    if url_count == 1:
-        driver.get(urllist) # will redirect to login page
+    if url_count == 0:
+        driver.get(url) # will redirect to login page
         riot_login() #Login
         print("title: ", driver.title) #grab page title to confirm the page loaded
     else:
+        print('get new url: ', url)
         driver.get(url)
     
-    #go_to_match_history(urllist)
-
     wait.until(EC.element_to_be_clickable((By.ID, "tab-695"))).click() #Go to the statistics section of the page
     page_source = driver.page_source # I believe this is how you pass off control of the web page to BS below.
 
@@ -174,11 +182,24 @@ for url in urllist:
 
     output_table = create_table(table)
     new_dataframe = build_dataframe(output_table, champlist)
+    #print(new_dataframe)
 
     write_to_csv(new_dataframe)
     
     #making sure we dont get limited by accessing too many match histories per minute
     print('sleeping')
+    time.sleep(5)
+
+    # adding the new match data into the total database
+    match_data = r'F:/LeagueStats/scraping/MatchHistoryScraping/game_data.csv'
+    database_file = r'F:/LeagueStats/scraping/MatchHistoryScraping/match_database.csv'
+    combine_csv(match_data, database_file)
+
     url_count = url_count + 1
-    time.sleep(10)
+    time.sleep(5)
+    print('URL Count', url_count)
+    continue
+
+
+    
 
