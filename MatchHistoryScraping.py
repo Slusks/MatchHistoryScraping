@@ -7,7 +7,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException 
 import zipfile
 import os
 import time
@@ -23,27 +25,39 @@ from bs4 import BeautifulSoup as bs #https://medium.com/ymedialabs-innovation/we
 
 
 # Global variables and start Parameters
-chrome_driver = "F:/LeagueStats/scraping/MatchHistoryScraping/chromedriver.exe" # location of chrome driver
-driver = webdriver.Chrome(chrome_driver) # open chrome
-
-
-#urldf = pd.read_csv(r"F:/LeagueStats/scraping/MatchHistoryScraping/URL.csv") # this includes the URLS for all games that have regular, accessible, matchhistory URLs.
-urldf = pd.read_csv(r"F:/LeagueStats/scraping/MatchHistoryScraping/testURL.csv") # this includes the URLS for all games that have regular, accessible, matchhistory URLs.
-urllist = urldf['url'].astype(str).tolist()
-destinationFolder = Path(r"F:/LeagueStats/scraping/MatchHistoryScraping/downloads") #this might be used in later production
-riot_login_url = ''
-
-#This is a selenium variable created to wait 20 seconds until pages load.
-wait = WebDriverWait(driver, 20)
-
-
-
-###
 mainDirectory = Path(r"F:/LeagueStats/scraping/MatchHistoryScraping/")
 pw_directory = Path(r"C:/Users/sam/Documents/riotpw.txt")
-###
+chrome_driver = "F:/LeagueStats/scraping/MatchHistoryScraping/chromedriver.exe" # location of chrome driver
+chrome_options = Options()
+#chrome_options.add_argument("--disable-extensions")
+#chrome_options.add_argument("--disable-gpu")
+#chrome_options.add_argument("--headless")
+# Selenium to load the page
+#Launching browser using instructions -> https://www.browserstack.com/guide/python-selenium-to-run-web-automation-test
+#Downloaded chrome driver is version 86.0.4240.22
+driver = webdriver.Chrome(chrome_driver, options=chrome_options) # open chrome
 
-print(mainDirectory)
+#fixes the urls so they default to the stat page which hopefully fixes DOM element issues but who knows at this point.
+def fix_urls(urllist):
+    urllist_fixed = []
+    for url in urllist:
+        url_fixed = url+'&tab=stats'
+        urllist_fixed.append(url_fixed)
+    #    if len(url) == 108:
+    #    elif len(url) == 126:
+    return urllist_fixed
+
+urldf = pd.read_csv(r"F:/LeagueStats/scraping/MatchHistoryScraping/URL.csv") # this includes the URLS for all games that have regular, accessible, matchhistory URLs.
+#urldf = pd.read_csv(r"F:/LeagueStats/scraping/MatchHistoryScraping/testURL.csv") # url file for testing fixed number of pages.
+urllist = urldf['url'].astype(str).tolist()
+urllist_fixed = fix_urls(urllist)
+
+#This is a selenium variable created to wait 30 seconds until pages load.
+#Ignore exceptions is to try and avoid the stale element reference exception per:
+#https://stackoverflow.com/questions/27003423/staleelementreferenceexception-on-python-selenium
+ignored_exceptions=(NoSuchElementException, StaleElementReferenceException)
+wait = WebDriverWait(driver, 60, ignored_exceptions=ignored_exceptions)
+
 
 #login to riot games account
 def riot_login():
@@ -56,13 +70,6 @@ def riot_login():
     wait.until(EC.visibility_of_element_located((By.NAME, "password"))).send_keys(password)
     wait.until(EC.element_to_be_clickable((By.XPATH , "/html/body/div/div/div/div[2]/div[1]/div/button"))).click()
 
-#function to send the URL to the search bar
-def go_to_match_history(url):
-    print('go_to_match_history running')
-    driver.get(url)
-    print(url)
-    time.sleep(10)
-
 # Selenium to grab the champion names and add them to a dictionary
 def get_champions():
     print('get_champion running')
@@ -71,14 +78,19 @@ def get_champions():
     count = 2
     while count < 12:
         index = str(count)
-        champion = driver.find_element_by_xpath('/html/body/div[3]/div[2]/div/div[2]/div/div/div/div[3]/div/div[2]/div[3]/div/div/div/table/tbody/tr[1]/td['+index+']/div/div[1]/div').get_attribute("data-rg-id")
+        my_element_XPATH = '/html/body/div[3]/div[2]/div/div[2]/div/div/div/div[3]/div/div[2]/div[3]/div/div/div/table/tbody/tr[1]/td['+index+']/div/div[1]/div'
+        wait.until(EC.presence_of_element_located((By.XPATH, my_element_XPATH)))
+        try:
+            champion = driver.find_element_by_xpath('/html/body/div[3]/div[2]/div/div[2]/div/div/div/div[3]/div/div[2]/div[3]/div/div/div/table/tbody/tr[1]/td['+index+']/div/div[1]/div').get_attribute("data-rg-id")
+        except:
+            return (False)                     
         champ_number = count-1
         champlist.append(champion)
         champdict.update({champ_number : champion})
         count = count + 1
     return (champlist)
 
-
+# Grab the HTML table data and put it into a list
 def create_table(table):
     print('create_table running')
     output_rows = []
@@ -98,14 +110,13 @@ def create_table(table):
                 output_columns.append(text)
         output_rows.append(output_columns) #this is where we make the list of rows
     return output_rows
+    #output_rows now contains a list of rows, where each row is either a heading, or an 11 element list where 
+    # element[0] is the title 
+    # element[1]-[10] are the statistics of interest.
+    # https://www.geeksforgeeks.org/creating-pandas-dataframe-using-list-of-lists/
 
-#output_rows now contains a list of rows, where each row is either a heading, or an 11 element list where 
-# element[0] is the title 
-# element[1]-[10] are the statistics of interest.
-# https://www.geeksforgeeks.org/creating-pandas-dataframe-using-list-of-lists/
-
-
-def build_dataframe(raw_table, champlist):
+#use the table list to build a dataframe and format it correctly
+def build_dataframe(raw_table, champlist, url):
     print('build_dataframe running')
     data_rows = []
     for i in raw_table:
@@ -113,9 +124,9 @@ def build_dataframe(raw_table, champlist):
             data_rows.append(i)
         else:
             continue
-    headings = ['headings']
-    for i in champlist:
-        headings.append(i)
+    ###headings = ['headings']
+    ###for i in champlist:
+    ###    headings.append(i)
     # all of the headings for when we transpose the dataframe
     new_headings = ['KDA', 'Largest Killing Spree', 'Largest Multi Kill', 'First Blood', 'Total Damage to Champions', 'Physical Damage to Champions', 'Magic Damage to Champions', 'True Damage to Champions', 'Total Damage Dealt', 'Physical Damage Dealt', 'Magic Damage Dealt', 'True Damage Dealt', 'Largest Critical Strike', 'Total Damage to Objectives', 'Total Damage to Turrets', 'Damage Healed', 'Damage Taken', 'Physical Damage Taken', 'Magic Damage Taken', 'True Damage Taken', 'Wards Placed', 'Wards Destroyed', 'Stealth Wards Purchased', 'Control Wards Purchased', 'Gold Earned', 'Gold Spent', 'Minions Killed', 'Neutral Minions Killed', "Neutral Minions Killed in Team's Jungle", 'Neutral Minions Killed in Enemy Jungle']
 
@@ -128,18 +139,20 @@ def build_dataframe(raw_table, champlist):
     dataframe2 = dataframe2.drop(0) #drop the now redundant row 0 which held our headings
     print('drop redundant line')
 
-    dataframe2['url'] = urllist[0] #add a column for our game url for relational purposes
+    dataframe2['url'] = url #add a column for our game url for relational purposes
     print('add url')
     dataframe2['champion'] = champlist #add the champions, note we're using the list here which might be risky because lists are unordered
     print('added champions')
 
     #print(dataframe2) # check for anything funny
     return dataframe2
-    
+
+#drop the dataframe to temp csv file    
 def write_to_csv(dataframe):
     print('write_to_csv running')
     dataframe.to_csv(r'F:/LeagueStats/scraping/MatchHistoryScraping/game_data.csv', index=False, header=True) # print to our csv
 
+#add content of temp csv file to database csv.
 def combine_csv(match_file, database_file):
     print('combining csv')
     skip_row=[0]
@@ -147,58 +160,71 @@ def combine_csv(match_file, database_file):
     match_data_container.to_csv(database_file, mode="a", index=False)
 
 
-
-#TO DO LIST
-# - take CSV generated here and add it to a master CSV
-# - Build in iteration so this can run across all of the urls
-# - run
-
-# Selenium to load the page
-#Launchring browser using instructions -> https://www.browserstack.com/guide/python-selenium-to-run-web-automation-test
-#Downloaded crhome driver is version 86.0.4240.22
 ###############################################################################################################################################################
 
 #Actual function flow starts here
 #iterate through url list
-url_count = 0
-for url in urllist:
-    if url_count == 0:
+url_count = 775 #this can be set in case there is an error in the code after some number of good iterations
+urllist_mod = urllist_fixed[url_count:] #this is how we can start in the middle without resetting the whole thing.
+for url in urllist_mod:
+    if url_count == 775:
         driver.get(url) # will redirect to login page
         riot_login() #Login
         print("title: ", driver.title) #grab page title to confirm the page loaded
     else:
         print('get new url: ', url)
+        time.sleep(3)
         driver.get(url)
+    #try:
+    wait.until(EC.element_to_be_clickable((By.ID, 'stats')))
+     #   print('found stats')
+    #except:
+     #   driver.get(url)
+     #   wait.until(EC.element_to_be_clickable((By.ID, 'stats')))
+     #   print('reloaded')
+        
     
-    wait.until(EC.element_to_be_clickable((By.ID, "tab-695"))).click() #Go to the statistics section of the page
-    page_source = driver.page_source # I believe this is how you pass off control of the web page to BS below.
+    
 
+    print('page loaded')
+    page_source = driver.page_source # I believe this is how you pass off control of the web page to BS below.
     #get a list of champion names for that match
     champlist = get_champions()
+    if not champlist:
+        driver.get(url)
+        champlist = get_champions()
+        print ('---RELOADED---')
+        pass
+
+
+    time.sleep(1)
 
     #beautiful soup to pull the data
     soup = bs(page_source, 'lxml')
     table = soup.find_all('table')[0] # Grab the first table
+    time.sleep(1)
 
     output_table = create_table(table)
-    new_dataframe = build_dataframe(output_table, champlist)
+    new_dataframe = build_dataframe(output_table, champlist, url)
+    time.sleep(1)
     #print(new_dataframe)
-
     write_to_csv(new_dataframe)
-    
     #making sure we dont get limited by accessing too many match histories per minute
-    print('sleeping')
-    time.sleep(5)
-
+    time.sleep(1)
     # adding the new match data into the total database
     match_data = r'F:/LeagueStats/scraping/MatchHistoryScraping/game_data.csv'
     database_file = r'F:/LeagueStats/scraping/MatchHistoryScraping/match_database.csv'
     combine_csv(match_data, database_file)
 
     url_count = url_count + 1
-    time.sleep(5)
+    if url_count % 10 != 0:
+        print('sleeping 3')
+        time.sleep(3)
+    elif url_count % 10 == 0:
+        print('sleeping 10')
+        time.sleep(10)
     print('URL Count', url_count)
-    continue
+    #continue I dont think I need this.
 
 
     
