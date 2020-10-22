@@ -56,7 +56,7 @@ urllist_fixed = fix_urls(urllist)
 #Ignore exceptions is to try and avoid the stale element reference exception per:
 #https://stackoverflow.com/questions/27003423/staleelementreferenceexception-on-python-selenium
 ignored_exceptions=(NoSuchElementException, StaleElementReferenceException)
-wait = WebDriverWait(driver, 60, ignored_exceptions=ignored_exceptions)
+wait = WebDriverWait(driver, 30, ignored_exceptions=ignored_exceptions)
 
 
 #login to riot games account
@@ -164,10 +164,10 @@ def combine_csv(match_file, database_file):
 
 #Actual function flow starts here
 #iterate through url list
-url_count = 775 #this can be set in case there is an error in the code after some number of good iterations
+url_count = 1095 #this can be set in case there is an error in the code after some number of good iterations
 urllist_mod = urllist_fixed[url_count:] #this is how we can start in the middle without resetting the whole thing.
 for url in urllist_mod:
-    if url_count == 775:
+    if url_count == 1095:
         driver.get(url) # will redirect to login page
         riot_login() #Login
         print("title: ", driver.title) #grab page title to confirm the page loaded
