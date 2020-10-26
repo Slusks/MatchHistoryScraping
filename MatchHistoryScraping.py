@@ -79,7 +79,10 @@ def get_champions():
     while count < 12:
         index = str(count)
         my_element_XPATH = '/html/body/div[3]/div[2]/div/div[2]/div/div/div/div[3]/div/div[2]/div[3]/div/div/div/table/tbody/tr[1]/td['+index+']/div/div[1]/div'
-        wait.until(EC.presence_of_element_located((By.XPATH, my_element_XPATH)))
+        try:
+            wait.until(EC.presence_of_element_located((By.XPATH, my_element_XPATH)))
+        except:
+            return(False)
         try:
             champion = driver.find_element_by_xpath('/html/body/div[3]/div[2]/div/div[2]/div/div/div/div[3]/div/div[2]/div[3]/div/div/div/table/tbody/tr[1]/td['+index+']/div/div[1]/div').get_attribute("data-rg-id")
         except:
@@ -164,10 +167,10 @@ def combine_csv(match_file, database_file):
 
 #Actual function flow starts here
 #iterate through url list
-url_count = 1095 #this can be set in case there is an error in the code after some number of good iterations
+url_count = 4717 #this can be set in case there is an error in the code after some number of good iterations
 urllist_mod = urllist_fixed[url_count:] #this is how we can start in the middle without resetting the whole thing.
 for url in urllist_mod:
-    if url_count == 1095:
+    if url_count == 4717:
         driver.get(url) # will redirect to login page
         riot_login() #Login
         print("title: ", driver.title) #grab page title to confirm the page loaded
@@ -175,26 +178,25 @@ for url in urllist_mod:
         print('get new url: ', url)
         time.sleep(3)
         driver.get(url)
-    #try:
-    wait.until(EC.element_to_be_clickable((By.ID, 'stats')))
-     #   print('found stats')
-    #except:
-     #   driver.get(url)
-     #   wait.until(EC.element_to_be_clickable((By.ID, 'stats')))
-     #   print('reloaded')
-        
-    
-    
 
-    print('page loaded')
+    try:    
+        wait.until(EC.element_to_be_clickable((By.ID, 'stats')))
+        print('page loaded')
+    except:
+        driver.get(url)
+        wait.until(EC.element_to_be_clickable((By.ID, 'stats')))
+        print('---RELOADED PAGE---')
+        pass
+
+
     page_source = driver.page_source # I believe this is how you pass off control of the web page to BS below.
     #get a list of champion names for that match
     champlist = get_champions()
     if not champlist:
         driver.get(url)
         champlist = get_champions()
-        print ('---RELOADED---')
-        pass
+        print ('---RELOADED CHAMP---')
+
 
 
     time.sleep(1)
@@ -224,7 +226,7 @@ for url in urllist_mod:
         print('sleeping 10')
         time.sleep(10)
     print('URL Count', url_count)
-    #continue I dont think I need this.
+ 
 
 
     
