@@ -167,11 +167,12 @@ def combine_csv(match_file, database_file):
 
 #Actual function flow starts here
 #iterate through url list
-#4717
-url_count = 8237 #this can be set in case there is an error in the code after some number of good iterations
-urllist_mod = urllist_fixed[url_count:] #this is how we can start in the middle without resetting the whole thing.
+#4717-8237
+#8237-end
+url_count = 0 #this can be set in case there is an error in the code after some number of good iterations
+urllist_mod = urllist_fixed[url_count:1] #this is how we can start in the middle without resetting the whole thing.
 for url in urllist_mod:
-    if url_count == 8237:
+    if url_count == 0:
         driver.get(url) # will redirect to login page
         riot_login() #Login
         print("title: ", driver.title) #grab page title to confirm the page loaded

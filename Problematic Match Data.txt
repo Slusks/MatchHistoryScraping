@@ -1,3 +1,32 @@
 Unable to access to due regional issue
 List Index - 4716
 https://matchhistory.euw.leagueoflegends.com/en/#match-details/ESPORTSTMNT05/1091012?gameHash=2d08d48b77555188&amp;&tab=stats
+
+More problems:
+- The Lines 1-121 all have the same match url. Probably just need to be removed and re-retrieved (note that's 10 lines per url so only 12 urls)
+## Fixed this issue. It was just a problem with the first URL being called a whole bunch of times
+- Some of the 'Largest Multi Kill' columns are a float instead of just an integer
+- Columns that are essentiall N/A have a '-' in them. That probably needs to be changed to a 0.
+
+Repeats:
+#1241328 - 40
+1241386
+1241394
+1241396
+1241467
+1241468
+1241474
+1270513
+1270545
+1270566
+1270591
+1280723
+1280752
+1270802
+1270814
+1390161
+1390196
+1390202
+1390213 - 30
+1260525
+1270462 - 20
