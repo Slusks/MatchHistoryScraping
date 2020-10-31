@@ -8,6 +8,7 @@ import pathlib
 
 toZero = re.compile(r",-\.\d{1},")
 toValhalla = re.compile(r"k\.\d{1},")
+toMordor = re.compile(r"mil\.\d{1},")
 
 input_file = Path(r"F:\LeagueStats\scraping\MatchHistoryScraping\match_database_fixed.csv")
 output_file = Path(r"F:\LeagueStats\scraping\MatchHistoryScraping\match_database_fixed_2.csv")
@@ -17,6 +18,7 @@ with open(input_file, "r", encoding='utf-8') as inputfile:
 
 output = re.sub(toZero, ",0,", data)
 output = re.sub(toValhalla, "k,", output)
+output = re.sub(toMordor, "mil,", output)
 
 with open(output_file, "w", encoding='utf-8') as outputfile:
     outputfile.write(output)
