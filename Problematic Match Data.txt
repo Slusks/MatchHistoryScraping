@@ -30,3 +30,24 @@ Repeats:
 1390213 - 30
 1260525
 1270462 - 20
+
+
+
+match_database_fixed_3.csv
+167970 rows
+178 repeat rows
+10720 rows with no champion on them.
+
+delinquent_match_database
+98410 rows
+67290 duplicate rows
+5900 rows with no champion on them.
+
+
+Order of operations for cleaning delinquent_match_database
+
+1. MatchHistoryScraping with a url list
+2. dot.py to fix FB column
+3. cleanup.py to fix formatting
+4. k-pop.py to replace the KDA column with k,d,a columns
+4. remove duplicates
