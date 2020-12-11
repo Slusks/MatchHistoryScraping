@@ -50,4 +50,5 @@ Order of operations for cleaning delinquent_match_database
 2. dot.py to fix FB column
 3. cleanup.py to fix formatting
 4. k-pop.py to replace the KDA column with k,d,a columns
+5. cleaningURLS.py to return urls to oracle's elixer matching url
 4. remove duplicates
