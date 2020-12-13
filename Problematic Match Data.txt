@@ -38,6 +38,7 @@ match_database_fixed_3.csv
 178 repeat rows
 10720 rows with no champion on them.
 
+## delinquent_match_database_database is my second attempt at scraping
 delinquent_match_database
 98410 rows
 67290 duplicate rows
@@ -52,3 +53,5 @@ Order of operations for cleaning delinquent_match_database
 4. k-pop.py to replace the KDA column with k,d,a columns
 5. cleaningURLS.py to return urls to oracle's elixer matching url
 4. remove duplicates
+
+##wukong apparently translates to monkeyking
