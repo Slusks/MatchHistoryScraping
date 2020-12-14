@@ -4,6 +4,8 @@ from csv import reader
 import pandas as pd
 import re
 from datetime import datetime
+import os
+import shutil
 now = datetime.now()
 
 ####################################################################################################################
@@ -13,7 +15,7 @@ now = datetime.now()
 #MatchHistoryScraping.py
 
 #1. Scraped file:
-scraped_file = Path(r"F:\LeagueStats\scraping\MatchHistoryScraping\cleaning files\match_database.csv") 
+scraped_file = Path(r"F:\LeagueStats\scraping\MatchHistoryScraping\data\delinquent_match_database.csv") 
 
 #2. Remove First Blood Dot
 first_blood_fixed = Path(r"F:\LeagueStats\scraping\MatchHistoryScraping\cleaning files\match_database_FB_Fixed.csv") 
@@ -162,6 +164,16 @@ def url_fix_ta(x):
     except:
         return x
 
+#replaces MonkeyKing with Wukong
+def long_live_the_king(x):
+    try:
+        if x=='MonkeyKing':
+            return 'Wukong'
+        else:
+            return x
+    except:
+        return x 
+
 #drops rows that dont have a champion in them, or have a bad champ reference like unnamed: 31
 def drop_False_champ(old, new_good, store_bad):
     print('drop False champ running')
@@ -178,13 +190,14 @@ def drop_dup(old_file, new_file):
     no_dup = df.drop_duplicates()
     no_dup.to_csv(new_file, index=False, header=True)
 
-###write whatever we ended up with to a master database. This is still in progress
+#write whatever we ended up with to a master database.
 def write_to_master(input_file):
-    df = pd.read_csv(input_file)
-    today = now.strftime("%m-%d-%Y_%H:%M")
-    master_file_name = "master_file_dtd_" + today + ".csv"
-    master_file = Path(r"F:\LeagueStats\scraping\MatchHistoryScraping\cleaning files\\"+master_file_name)
-    df.to_csv(master_file, mode="a", index=False)
+    today = now.strftime("%m-%d-%Y_%H-%M")
+    master_file_name = r"\master_file_dtd_" + today + ".csv"
+    target_directory = r"F:\LeagueStats\scraping\MatchHistoryScraping\cleaning files"
+    full_master_file_name = Path(target_directory + master_file_name)
+    shutil.copy(input_file, full_master_file_name)
+    print("New file created:", today)
 
 #####################################################################################################################
 ## RUN FUNCTIONS ##
@@ -208,6 +221,8 @@ df2['url'] = df2['url'].apply(lambda x: url_trim_108(x))
 print('url trim running')
 df2['url'] = df2['url'].apply(lambda x: url_fix_ta(x))
 print('fix ta running')
+df2['champion'] = df2['champion'].apply(lambda x: long_live_the_king(x))
+print("Long Live The King")
 df2.to_csv(fixed_url_for_sql, index = False, header = True)
 
 data_frame_trimmed_url = pd.read_csv(fixed_url_for_sql)
@@ -225,6 +240,8 @@ drop_False_champ(fixed_url_for_sql, rows_missing_champs_removed, rows_missing_ch
 #drops duplicate rows that are left in the working file
 drop_dup(rows_missing_champs_removed, duplicate_lines_removed)
 
+
+#This writes the final file without the duplicates in it to a seperate file and adds a time stamp
 write_to_master(duplicate_lines_removed)
 
 
