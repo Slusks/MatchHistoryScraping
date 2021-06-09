@@ -20,6 +20,7 @@ def get_urllist():
     file = pd.read_csv(url_file, header=0)
     l = list(file.url)
     single = list(set(l))
+    print(len(single))
     return (single)
 
 # coding: utf-8
@@ -151,7 +152,7 @@ error_url_index =[]
 error_urls =[]
 for url in raw_urllist:
     try:
-        content = get_match_data(url, True)
+        content = get_match_data(url, False)
         data_list = get_data(content)
         write_to_csv(data_list)
         combine_csv(temp_file, database_file)
