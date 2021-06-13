@@ -127,7 +127,7 @@ def combine_csv(match_data, database_file):
 
 
 ###Running Function
-database_file = r'C:/Users/sam/Desktop/ScrapeTest/databaseVX.csv'
+database_file = r'C:/Users/sam/Desktop/ScrapeTest/databaseV2.csv'
 temp_file = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2.csv'
 raw_urllist = old_raw_urllist #get_urllist()
 print("got URLs")
