@@ -111,7 +111,6 @@ def get_match_data(url, test, lpl):
 # Take the json data, combine it into a list of lists
 ################################## THIS FUNCTION IS NOT WORKING
 def get_data(json_content, test):
-    print(headers_list)
     count = 0
     list_list = []
     while count < 10:
@@ -123,13 +122,14 @@ def get_data(json_content, test):
         outputlist.append(champ_key_dict[str(champion_id)])
         for i in  full_headers_dict: #This is an issue. Didn't actually capture all the possible headers
             if i in headers_list:
-                outputlist.append(json_content["participants"][count]["stats"][i]) #this is probably the problem. will probs work for lpl but not anything else now
+                outputlist.append(json_content["participants"][count]["stats"][i])
         outputlist.append(gameId)
         list_list.append(outputlist)
-        count +=1
+        count += 1
     if test == True:
         pprint.pprint("list_list:", list_list)
     return (list_list)
+
 #this has to be way worked on with data from LPL decoding
 def get_data_lpl(json_content):
     print('get_data')
@@ -177,34 +177,19 @@ start_time = time.time()
 error_url_index =[]
 error_urls =[]
 for url in raw_urllist:
-    if "https://lpl.qq.com" in url:
-        try:
-            lpl = True
-            print('lpl:', lpl)
-            content = get_match_data(url, False, lpl)
-            print('lpl coming soon')
-            #data_list = get_data_lpl(content)
-        except:
-            print(raw_urllist.index(url))
-            error_url_index.append(raw_urllist.index(url))
-            error_urls.append(url)
-            continue
-    else:
-        try:
-            lpl = False
-            print('lpl:', lpl)
-            content = get_match_data(url, False, lpl) 
-            data_list = get_data(content, True)
-            write_to_csv(data_list, temp_file)
-            combine_csv(temp_file, test_database_file)
-            iteration_count = iteration_count + 1
-            print("completed:", iteration_count)
-            time.sleep(0.5)
-        except:
-            print(raw_urllist.index(url))
-            error_url_index.append(raw_urllist.index(url))
-            error_urls.append(url)
-            continue
+    try:
+        content = get_match_data(url, False)
+        data_list = get_data(content, True)
+        write_to_csv(data_list)
+        combine_csv(temp_file, database_file)
+        iteration_count = iteration_count + 1
+        print("completed:", iteration_count)
+        time.sleep(0.5)
+    except:
+        print(raw_urllist.index(url))
+        error_url_index.append(raw_urllist.index(url))
+        error_urls.append(url)
+        continue
 #collecting all the urls that failed
 write_to_csv(error_urls, error_url_file )
 #runstats
