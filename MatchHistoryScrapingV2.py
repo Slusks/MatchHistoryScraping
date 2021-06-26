@@ -6,7 +6,7 @@ import pandas as pd
 import pprint
 from pathlib import Path #https://medium.com/@ageitgey/python-3-quick-tip-the-easy-way-to-deal-with-file-paths-on-windows-mac-and-linux-11a072b58d5f
 from cookie_monster import COOKIE
-import csv
+import json
 
 
 
@@ -17,16 +17,8 @@ import csv
     #So I honestly can't remember if this is just filling in holes from Oracle's Elixer tables or if this is supposed to be all information, so it definitely contains some gaps
     #in the information it contains.
 full_headers_dict = {"magicDamageDealt":"totalmagicdamagedealt", "physicalDamageDealt":"totalphysicaldamagedealt", "physicalDamageTaken":"physicaldamagetaken", "kills":"kills","deaths":"deaths","assists":"assists", 'firstBloodKill': 'firstblood', 'totalDamageDealtToChampions': 'totaldamagetochampions', 'physicalDamageDealtToChampions': 'physicaldamagetochampions', 'magicDamageDealtToChampions': 'magicdamagetochampions', 'trueDamageDealtToChampions': 'truedamagetochampions', 'damageDealtToObjectives': 'totaldamagetoobjectives', 'damageDealtToTurrets': 'totaldamagetoturrets', 'totalHeal': 'damagehealed', 'totalDamageTaken': 'damagetaken', 'magicalDamageTaken': 'magicdamagetaken', 'wardsKilled': 'wardsdestroyed', 'sightWardsBoughtInGame': 'stealthwardspurchased', 'visionWardsBoughtInGame': 'controlwardspurchased', 'totalMinionsKilled': 'minionskilled', 'neutralMinionsKilledTeamJungle': "neutralminionskilledinteam'sjungle", 'neutralMinionsKilledEnemyJungle': 'neutralminionskilledinenemyjungle', 'killingSprees': 'killingsprees', 'longestTimeSpentLiving': 'longesttimespentliving', 'damageSelfMitigated': 'selfmitigateddamage', 'visionScore': 'visionscore', 'timeCCingOthers': 'timeccingothers', 'turretKills': 'totalTurretKills', 'inhibitorKills': 'totalInhibitorKills', 'totalTimeCrowdControlDealt': 'totaltimeapplyingcc', 'firstBloodAssist': 'firstbloodassist', 'firstTowerKill': 'firsttowerkill', 'firstTowerAssist': 'firsttowerassist', 'firstInhibitorKill': 'firstinhibkill', 'firstInhibitorAssist': 'firstinhibassist', 'doubleKills': 'doublekills', 'tripleKills': 'triplekills', 'quadraKills': 'quadrakills', 'pentaKills': 'pentakills', 'goldEarned':'goldearned', 'goldSpent': 'goldspent', "largestCriticalStrike":"largestcriticalstrike", "largestKillingSpree":"largestkillingspree", "largestMultiKill":"largestmultikill"}
-
+full_headers_dict_lpl = {"name": "player","hero":"champion","kill":"kills","death":"deaths","assist":"assists",'firstBlood': 'firstblood', 'totalDamageToChamp': 'totaldamagetochampions', 'pDamageToChamp': 'physicaldamagetochampions', 'mDamageDealtToChamp': 'magicdamagetochampions', 'trueDamageDealtToChampions': 'truedamagetochampions', 'damageDealtToObjectives': 'totaldamagetoobjectives', 'damageDealtToTurrets': 'totaldamagetoturrets', 'totalHeal': 'damagehealed', 'totalDamageTaken': 'damagetaken', 'mDamageTaken': 'magicdamagetaken', 'wardsKilled': 'wardsdestroyed', 'sightWardsBoughtInGame': 'stealthwardspurchased', 'visionWardsBought': 'controlwardspurchased', 'lasthit': 'minionskilled', 'neutralKilledTJungle': "neutralminionskilledinteam'sjungle", 'neutralKilledEJungle': 'neutralminionskilledinenemyjungle', 'killingSprees': 'killingsprees', 'longestTimeSpentLiving': 'longesttimespentliving', 'damageSelfMitigated': 'selfmitigateddamage', 'visionScore': 'visionscore', 'timeCCingOthers': 'timeccingothers', 'towerKills': 'totalTurretKills', 'inhibitorKills': 'totalInhibitorKills', 'totalTimeCrowdControlDealt': 'totaltimeapplyingcc', 'firstBloodAssist': 'firstbloodassist', 'firstTowerKill': 'firsttowerkill', 'firstTowerAssist': 'firsttowerassist', 'firstInhibitorKill': 'firstinhibkill', 'firstInhibitorAssist': 'firstinhibassist', 'dKills': 'doublekills', 'tKills': 'triplekills', 'qKills': 'quadrakills', 'pKills': 'pentakills', 'side':'side', 'gold':'goldearned', 'GoldSpent': 'goldspent', "physicalDamageDealt":"physicaldamagedealt", "pDamageTaken":"physicaldamagetaken", 'deadTime':'timespentdead', 'mDamageDealt':'totalmagicdamagedealt', 'largestCriticalStrike':'largestcriticalstrike',  "largestKillingSpree":"largestkillingspree", "largestMultiKill":"largestmultikill"}
 #Function that grabs the URL list from a csv
-def get_urllist():
-    l = []
-    url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/data/URL.csv"
-    file = pd.read_csv(url_file, header=0)
-    l = list(file.url)
-    single = list(set(l))
-    if len(single) > 5:
-        return (single)
 
 # coding: utf-8
 #!/usr/bin/env python3
@@ -52,33 +44,27 @@ longer_raw_urllist =['http://matchhistory.na.leagueoflegends.com/en/#match-detai
 #table_headers = ["kills","deaths","assists","Largest Killing Spree","Largest Multi Kill","First Blood","Total Damage to Champions","Physical Damage to Champions","Magic Damage to Champions","True Damage to Champions","Total Damage Dealt","Physical Damage Dealt","Magic Damage Dealt","True Damage Dealt","Largest Critical Strike","Total Damage to Objectives","Total Damage to Turrets","Damage Healed","Damage Taken","Physical Damage Taken","Magic Damage Taken","True Damage Taken","Wards Placed","Wards Destroyed","Stealth Wards Purchased","Control Wards Purchased","Gold Earned","Gold Spent","Minions Killed","Neutral Minions Killed","Neutral Minions Killed in Team's Jungle","Neutral Minions Killed in Enemy Jungle","url","champion"]
 
 
-
-#fixes URL into the form that it needs to be for scraping
-#This will only work for non-LPL matches at this time.
-def url_for_request_scraping(raw_url):
-    cut = raw_url.split("#match-details/")[1].split("&amp;tab=overview,Unnamed: 31False")[0]
-    new_url = "https://acs.leagueoflegends.com/v1/stats/game/"+cut
-    return (new_url)
-
-def url_for_lpl_scraping(raw_url):
-    base_url = "https://lpl.qq.com/web201612/data/LOL_MATCH_DETAIL_"
-    js = ".js"
-    match_num = raw_url[-4:]
-    new_url = base_url + match_num + js
-    return (new_url)
-
 # Starting in your browser, select the "cookie" content from your network request AFTER you've logged in. It should
 # look similar to the following:
 
-
+######################################Functions that only run once############################################################################################
 # Format your cookie into a dictionary form
-user_cookie = dict()
+def get_urllist():
+    l = []
+    url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/data/URL.csv"
+    file = pd.read_csv(url_file, header=0)
+    l = list(file.url)
+    single = list(set(l))
+    if len(single) > 5:
+        return (single)
 
+user_cookie = dict()
 for item in COOKIE.split("; "):
     k, v = item.split("=")
     user_cookie[k] = v
 
-#Functions that only run once
+
+
 #This is pulling the champion data.
 champ_dd = requests.get("https://ddragon.leagueoflegends.com/cdn/11.8.1/data/en_US/champion.json", cookies=user_cookie)
 champ_json = champ_dd.json()
@@ -86,20 +72,41 @@ champ_name = champ_json["data"] #this creates a list of all the champions
 champ_key_dict = {}
 for i in champ_name:
     champ_key_dict.update({champ_json["data"][i]["key"]:i})
-#pprint.pprint(champ_dd.json())
 
-### Creating the headers
+### Creating the headers for non lpl
 x = ["player", "champion"]
 headers_list = list(full_headers_dict.keys())
 z = ["gameId"]
 table_headings = x+headers_list+z
 
+###############################################################################################################################################################
+######################################  Gen Functions #########################################################################################################
+#fixes URL into the form that it needs to be for scraping
+def url_for_request_scraping(raw_url):
+    cut = raw_url.split("#match-details/")[1].split("&amp;tab=overview,Unnamed: 31False")[0]
+    new_url = "https://acs.leagueoflegends.com/v1/stats/game/"+cut
+    return (new_url)
+
+def url_for_request_scraping_lpl(raw_url):
+    base_url = "https://lpl.qq.com/web201612/data/LOL_MATCH_DETAIL_"
+    js = ".js"
+    match_num = raw_url[-4:]
+    new_url = base_url + match_num + js
+    return (new_url)
+
+
 #get request that needs to be looped
-def get_match_data(url, test, lpl):
-    if lpl:
-        good_url = url_for_lpl_scraping(url)
-    else:
-        good_url = url_for_request_scraping(url)
+def get_match_data(url, test):
+    good_url = url_for_request_scraping(url)
+    json_file = requests.get(good_url, cookies=user_cookie)
+    assert json_file.status_code == 200
+    json_content = json_file.json()
+    if test == True:
+        pprint.pprint(json_content)
+    return(json_content)
+
+def get_match_data_lpl(url, test):
+    good_url = url_for_request_scraping_lpl(url)
     json_file = requests.get(good_url, cookies=user_cookie)
     assert json_file.status_code == 200
     json_content = json_file.json()
@@ -120,9 +127,9 @@ def get_data(json_content, test):
         gameId = json_content["gameId"]
         outputlist.append(player)
         outputlist.append(champ_key_dict[str(champion_id)])
-        for i in  full_headers_dict: #This is an issue. Didn't actually capture all the possible headers
+        for i in  full_headers_dict:
             if i in headers_list:
-                outputlist.append(json_content["participants"][count]["stats"][i]) #this line doesn't work
+                outputlist.append(json_content["participants"][count]["stats"][i])
         outputlist.append(gameId)
         list_list.append(outputlist)
         count += 1
@@ -131,10 +138,28 @@ def get_data(json_content, test):
 
 #this has to be way worked on with data from LPL decoding
 def get_data_lpl(json_content):
-    print('get_data')
+    
     count = 0
     list_list = []
     while count < 10:
+        #### This section will create a list of all of the match data
+        jd = json.loads(json_content["sMatchInfo"][0]['battleInfo']['BattleData'])
+        control = {'side':'left', 'count':0, 'records':0}
+        while control['records'] < 10:
+            if control['count'] == 5:
+                control['side'] = 'right'
+                control['count'] = 0
+            else:
+                side = control['side']
+                count = control['count']
+                data = jd[side]['players'][count]
+                list_list.append(data) # player name and champion (hero) id are in this already so we dont need to fetch seperately
+                control['count'] = control['count'] + 1
+                control['records'] = control['records'] + 1
+        ###
+
+
+
         outputlist = []
         player = json_content["participantIdentities"][count]["player"]["summonerName"]
         champion_id = json_content["participants"][count]["championId"]
@@ -161,10 +186,16 @@ def combine_csv(match_data, database_file):
     skip_row=[0]
     match_data_container = pd.read_csv(match_data, header=0, skiprows=skip_row, delimiter=',',encoding="utf-8-sig")
     match_data_container.to_csv(database_file, mode="a", index=False)
+#####################################################################################################################################################
 
+#check if URL is lpl
+def not_lpl(url):
+    if "https://lpl.qq.com" in url:
+        return(False)
+    else:
+        return(True)
 
-
-###Running Function
+###Variables and Functions to run.
 database_file = r'C:/Users/sam/Desktop/ScrapeTest/databaseV3.csv'
 test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_databaseV3.csv'
 temp_file = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2.csv'
@@ -176,23 +207,40 @@ start_time = time.time()
 error_url_index =[]
 error_urls =[]
 test = 0
+
 for url in raw_urllist:
-    try:
-        content = get_match_data(url, False, False) #url, test, lpl content
-        data_list = get_data(content, True)
-        print('data_list')
-        write_to_csv(data_list)
-        combine_csv(temp_file, test_database_file)
-        iteration_count = iteration_count + 1
-        print("completed:", iteration_count)
-        time.sleep(0.5)
-    except:
-        #print('error url:',raw_urllist.index(url))
-        error_url_index.append(raw_urllist.index(url))
-        error_urls.append(url)
-        continue
+    if not_lpl(url):
+        try:
+            content = get_match_data(url, False) #url, test
+            data_list = get_data_lpl(content, True)
+            print('data_list')
+            write_to_csv(data_list)
+            combine_csv(temp_file, test_database_file)
+            iteration_count = iteration_count + 1
+            print("completed:", iteration_count)
+            time.sleep(0.5)
+        except:
+            print('error url:',raw_urllist.index(url))
+            error_url_index.append(raw_urllist.index(url))
+            error_urls.append(url)
+            continue
+    else:
+        try:
+            content = get_match_data_lpl(url, False, False) #url, test, lpl content
+            data_list = get_data_lpl(content, True)
+            write_to_csv(data_list)
+            combine_csv(temp_file, test_database_file)
+            iteration_count = iteration_count + 1
+            print("completed:", iteration_count)
+            time.sleep(0.5)
+        except:
+            print('error url:',raw_urllist.index(url))
+            error_url_index.append(raw_urllist.index(url))
+            error_urls.append(url)
+            continue
     #collecting all the urls that failed
     write_to_csv(error_urls, error_url_file )
+
     #runstats
     print('output_file:', test_database_file)
     print("Run time:", time.time() - start_time )
