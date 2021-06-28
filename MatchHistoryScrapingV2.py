@@ -122,9 +122,9 @@ def get_data(json_content, test):
     list_list = []
     while count < 10:
         outputlist = []
-        player = json_content["participantIdentities"][count]["player"]["summonerName"]
-        champion_id = json_content["participants"][count]["championId"]
-        gameId = json_content["gameId"]
+        player = json_content["participantIdentities"][count]["player"]["summonerName"] #str
+        champion_id = json_content["participants"][count]["championId"] #str
+        gameId = json_content["gameId"] #str
         outputlist.append(player)
         outputlist.append(champ_key_dict[str(champion_id)])
         for i in  full_headers_dict:
@@ -138,24 +138,7 @@ def get_data(json_content, test):
 
 #this has to be way worked on with data from LPL decoding
 def get_data_lpl(json_content):
-    
-    count = 0
-    list_list = []
-    while count < 10:
-        #### This section will create a list of all of the match data
-        jd = json.loads(json_content["sMatchInfo"][0]['battleInfo']['BattleData'])
-        control = {'side':'left', 'count':0, 'records':0}
-        while control['records'] < 10:
-            if control['count'] == 5:
-                control['side'] = 'right'
-                control['count'] = 0
-            else:
-                side = control['side']
-                count = control['count']
-                data = jd[side]['players'][count]
-                list_list.append(data) # player name and champion (hero) id are in this already so we dont need to fetch seperately
-                control['count'] = control['count'] + 1
-                control['records'] = control['records'] + 1
+    print("TBD")
         ###
 
 
