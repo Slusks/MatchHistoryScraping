@@ -7,7 +7,7 @@ import pprint
 from pathlib import Path #https://medium.com/@ageitgey/python-3-quick-tip-the-easy-way-to-deal-with-file-paths-on-windows-mac-and-linux-11a072b58d5f
 from cookie_monster import COOKIE
 import json
-
+import os
 
 
 #Variables and Headers - wont need this until we're processing the text files
@@ -82,6 +82,30 @@ def get_urllist():
     single = list(set(l))
     if len(single) > 5:
         return (single)
+
+#gotta run this on both header dicts prior to running anything else so they end up in the same order
+# orders them by value because all of the values are the same
+def get_key(dic, val):
+    for key, value in dic.items():
+         if val == value:
+             return key
+def sort_dictionary(in_dict):
+    x = list(in_dict.keys())
+    y = list(in_dict.values())
+    new_d = {}
+    y_sorted = sorted(y)
+    for i in y_sorted:
+        key = get_key(in_dict,i)
+        new_d[key] = i
+    return(new_d)
+
+#get alphabetized headers dictionary
+a_full_headers_dict_lpl = sort_dictionary(full_headers_dict_lpl)
+a_keys = a_full_headers_dict_lpl.keys()
+
+#alphabetized non-lpl headers
+a_full_headers_dict = sort_dictionary(full_headers_dict)
+b_keys = a_full_headers_dict.keys()
 
 user_cookie = dict()
 for item in COOKIE.split("; "):
@@ -170,7 +194,54 @@ def get_data(json_content, test):
 
 #this has to be way worked on with data from LPL decoding
 def get_data_lpl(json_content, test):
-    print("TBD")
+    list_list = []
+    jd = json.loads(json_content["sMatchInfo"][0]['battleInfo']['BattleData']) #this returns a json
+    keys = jd.keys()
+    control = {'side':'left', 'count':0, 'records':0}
+    gameId= json_content['bMatchId']
+    #this subsection is to move between the 'right' and 'left' team lists because that's how this info is nested.
+    while control['records'] < 10: #set this to 1 to get it to run for only one player
+        output_list = []
+        if control['count'] == 5:
+            control['side'] = 'right'
+            control['count'] = 0
+        else: #I think the champion id -> champion modifier goes in here.
+            side = control['side']
+            count = control['count']
+            data = jd[side]['players'][count] #dicts
+        for i in a_keys:
+            try:
+                if i == 'hero': #this statement worked
+                    output_list.append(str(champ_key_dict[jd[side]['players'][count][i]]))
+                elif data[i]:
+                    #print('yes')
+                    output_list.append(data[i]) #list of all of the player info, which is currently fucking up
+                elif i == 'firstBlood': #have to have this statement in here because apparently if the player didn't FB they just leave the line empty and python picks it up as False
+                        if not data[i]:
+                            data[i] = '0'
+                            output_list.append(data[i])
+                        else:
+                            data[i] = '1'
+                            output_list.append(data[i])
+                elif i == 'game-id':
+                    output_list.append(gameId)
+                elif i == 'side':
+                    output_list.append(control['side'])
+                else:
+                    print (i, 'not in lpl headers')
+            except Exception as e: # probably dont need this full line because I'm doing something with the exception
+                if i in b_keys:
+                    print (i, "in non-lpl headers")
+                    pass
+                elif i == 'game-id' or 'side':
+                    continue
+                else:
+                    print ("exception", i)
+        list_list.append(output_list)
+        control['count'] = control['count'] + 1
+        control['records'] = control['records'] + 1
+        print('done')
+    return(list_list)
 
 #write lists to temp CSV
 def write_to_csv(data_list, temp_output_file):
@@ -193,10 +264,17 @@ def not_lpl(url):
     else:
         return(True)
 
-###Variables and Functions to run.
+###Variables and Functions to run. #Not currently setup for laptop
 database_file = r'C:/Users/sam/Desktop/ScrapeTest/databaseV3.csv'
 test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_databaseV3.csv'
 temp_file = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2.csv'
+
+database_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/databaseV3_lpl.csv'
+test_database_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/test_databaseV3_lpl.csv'
+temp_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2_lpl.csv'
+
+master_file = r'C:/Users/sam/Desktop/ScrapeTest/master_combined_database.csv'
+
 error_url_file = r'C:/Users/sam/Desktop/ScrapeTest/error_url_list.csv'
 raw_urllist = test_raw_urllist #get_urllist() #
 print("got URLs")
@@ -227,7 +305,7 @@ for url in raw_urllist:
             content = get_match_data_lpl(url, False, False) #url, test, lpl content
             data_list = get_data_lpl(content, True)
             write_to_csv(data_list)
-            combine_csv(temp_file, test_database_file)
+            combine_csv(temp_file_lpl, test_database_file_lpl)
             iteration_count = iteration_count + 1
             print("completed:", iteration_count)
             time.sleep(0.5)
@@ -237,6 +315,12 @@ for url in raw_urllist:
             error_urls.append(url)
             e_list.append(e)
             continue
+
+    #combine into master file
+    combine_csv(test_database_file_lpl, test_database_file)
+    print ('renaming file')
+    os.rename(test_database_file, master_file)
+
     #collecting all the urls that failed
     write_to_csv(error_urls, error_url_file, e_list )
 
