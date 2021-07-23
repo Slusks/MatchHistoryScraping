@@ -28,6 +28,7 @@ raw_headers_dict_lpl = {"name": "player","hero":"champion","kill":"kills","death
 #### I dont know if I want gameId or matchId in the lpl headers dict
 # 
 #Alphabetizing the raw dictionaries of headers to make sure everything is always in the same order for output. 
+#This is apparently not very Pythonic
 def get_key(dic, val):
     for key, value in dic.items():
          if val == value:
@@ -57,9 +58,9 @@ test_raw_urllist = [
 "https://matchhistory.br.leagueoflegends.com/pt/#match-details/ESPORTSTMNT03/570139?gameHash=ba727c1db6d1cfbb&amp;tab=overview",
 "https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT05/1540037?gameHash=df189f4cefd8bfea&amp;tab=overview",
 "http://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT06/1160644?gameHash=744c3e9779ad519c&amp;tab=overview,Unnamed: 31",
-"https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT02/660033?gameHash=3ae31e7697461999&amp;tab=overview,False",
+"https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT02/660033?gameHash=3ae31e7697461999&amp;tab=overview,False"#,
 "https://lpl.qq.com/es/stats.shtml?bmid=7325",
-"https://lpl.qq.com/es/stats.shtml?bmid=7325"
+"https://lpl.qq.com/es/stats.shtml?bmid=6909"
 ]
 
 single_url = "https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT02/660033?gameHash=3ae31e7697461999&amp;tab=overview,False"
@@ -68,9 +69,6 @@ longer_raw_urllist =['http://matchhistory.na.leagueoflegends.com/en/#match-detai
 
 #table_headers = ["kills","deaths","assists","Largest Killing Spree","Largest Multi Kill","First Blood","Total Damage to Champions","Physical Damage to Champions","Magic Damage to Champions","True Damage to Champions","Total Damage Dealt","Physical Damage Dealt","Magic Damage Dealt","True Damage Dealt","Largest Critical Strike","Total Damage to Objectives","Total Damage to Turrets","Damage Healed","Damage Taken","Physical Damage Taken","Magic Damage Taken","True Damage Taken","Wards Placed","Wards Destroyed","Stealth Wards Purchased","Control Wards Purchased","Gold Earned","Gold Spent","Minions Killed","Neutral Minions Killed","Neutral Minions Killed in Team's Jungle","Neutral Minions Killed in Enemy Jungle","url","champion"]
 
-
-# Starting in your browser, select the "cookie" content from your network request AFTER you've logged in. It should
-# look similar to the following:
 
 ######################################Functions that only run once############################################################################################
 # Format your cookie into a dictionary form
@@ -136,8 +134,12 @@ headers_list_lpl = list(full_headers_dict_lpl.keys())
 ######################################  Gen Functions #########################################################################################################
 #fixes URL into the form that it needs to be for scraping
 def url_for_request_scraping(raw_url, test):
-    cut = raw_url.split("#match-details/")[1].split("&amp;tab=overview,Unnamed: 31False")[0]
-    new_url = "https://acs.leagueoflegends.com/v1/stats/game/"+cut
+    cut = raw_url.split("#match-details/")[1].split("&amp;tab=overview,Unnamed: 31,False")[0]
+    cut_cut = cut.replace('Unnamed: 31', "") #this and the line below might have a better pythoni method to complete
+    cut_cut = cut_cut.replace("False","")
+    new_url = "https://acs.leagueoflegends.com/v1/stats/game/"+cut_cut
+    if test == True:
+        pprint.pprint(new_url)
     return (new_url)
 
 def url_for_request_scraping_lpl(raw_url, test):
@@ -145,12 +147,14 @@ def url_for_request_scraping_lpl(raw_url, test):
     js = ".js"
     match_num = raw_url[-4:]
     new_url = base_url + match_num + js
+    if test == True:
+        pprint.pprint(new_url)
     return (new_url)
 
 
 #get request that needs to be looped
 def get_match_data(url, test):
-    good_url = url_for_request_scraping(url)
+    good_url = url_for_request_scraping(url, False)
     json_file = requests.get(good_url, cookies=user_cookie)
     assert json_file.status_code == 200
     json_content = json_file.json()
@@ -159,7 +163,7 @@ def get_match_data(url, test):
     return(json_content)
 
 def get_match_data_lpl(url, test):
-    good_url = url_for_request_scraping_lpl(url)
+    good_url = url_for_request_scraping_lpl(url, False)
     json_file = requests.get(good_url, cookies=user_cookie)
     assert json_file.status_code == 200
     json_content = json_file.json()
@@ -182,7 +186,9 @@ def get_data(json_content, test):
         outputlist.append(teamId)
         outputlist.append(champ_key_dict[str(champion_id)])
         for i in  full_headers_dict:
-            if i in headers_list:
+            if i =='championId' or 'gameId':
+                pass
+            elif i in headers_list:
                 outputlist.append(json_content["participants"][count]["stats"][i])
         outputlist.append(gameId)
         list_list.append(outputlist)
@@ -241,6 +247,8 @@ def get_data_lpl(json_content, test):
         control['count'] = control['count'] + 1
         control['records'] = control['records'] + 1
         print('done')
+    if test == True:
+        pprint.pprint(list_list)
     return(list_list)
 
 #write lists to temp CSV
@@ -264,18 +272,35 @@ def not_lpl(url):
     else:
         return(True)
 
-###Variables and Functions to run. #Not currently setup for laptop
-database_file = r'C:/Users/sam/Desktop/ScrapeTest/databaseV3.csv'
-test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_databaseV3.csv'
-temp_file = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2.csv'
+###Variables and Functions to run. #####################################################################################################################################3
+on_Laptop = True
 
-database_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/databaseV3_lpl.csv'
-test_database_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/test_databaseV3_lpl.csv'
-temp_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2_lpl.csv'
+if on_Laptop:
+    database_file = r'C:/Users/samsl/Desktop/ScrapeTest/databaseV3.csv'
+    test_database_file = r'C:/Users/samsl/Desktop/ScrapeTest/test_databaseV3.csv'
+    temp_file = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2.csv'
 
-master_file = r'C:/Users/sam/Desktop/ScrapeTest/master_combined_database.csv'
+    database_file_lpl = r'C:/Users/samsl/Desktop/ScrapeTest/databaseV3_lpl.csv'
+    test_database_file_lpl = r'C:/Users/samsl/Desktop/ScrapeTest/test_databaseV3_lpl.csv'
+    temp_file_lpl = r'C:/Users/samsl/Desktop/ScrapeTest/scrapeV2_lpl.csv'
 
-error_url_file = r'C:/Users/sam/Desktop/ScrapeTest/error_url_list.csv'
+    master_file = r'C:/Users/samsl/Desktop/ScrapeTest/master_combined_database.csv'
+
+    error_url_file = r'C:/Users/samsl/Desktop/ScrapeTest/error_url_list.csv'    
+elif not on_Laptop:
+    database_file = r'C:/Users/sam/Desktop/ScrapeTest/databaseV3.csv'
+    test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_databaseV3.csv'
+    temp_file = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2.csv'
+
+    database_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/databaseV3_lpl.csv'
+    test_database_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/test_databaseV3_lpl.csv'
+    temp_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2_lpl.csv'
+
+    master_file = r'C:/Users/sam/Desktop/ScrapeTest/master_combined_database.csv'
+
+    error_url_file = r'C:/Users/sam/Desktop/ScrapeTest/error_url_list.csv'
+
+ ########################################################################################################################################################################   
 raw_urllist = test_raw_urllist #get_urllist() #
 print("got URLs")
 iteration_count = 0
@@ -287,30 +312,30 @@ for url in raw_urllist:
     if not_lpl(url):
         try:
             content = get_match_data(url, False) #url, test
-            data_list = get_data_lpl(content, True)
+            data_list = get_data(content, False)
             print('data_list')
-            write_to_csv(data_list)
+            write_to_csv(data_list, temp_file)
             combine_csv(temp_file, test_database_file)
             iteration_count = iteration_count + 1
             print("completed:", iteration_count)
             time.sleep(0.5)
         except Exception as e:
-            print(e)
+            print('e',e)
             error_url_index.append(raw_urllist.index(url))
             error_urls.append(url)
             e_list.append(e)
             continue
     else:
         try:
-            content = get_match_data_lpl(url, False, False) #url, test, lpl content
+            content = get_match_data_lpl(url, False) #url, test, lpl content
             data_list = get_data_lpl(content, True)
-            write_to_csv(data_list)
+            write_to_csv(data_list), temp_file_lpl
             combine_csv(temp_file_lpl, test_database_file_lpl)
             iteration_count = iteration_count + 1
             print("completed:", iteration_count)
             time.sleep(0.5)
         except Exception as e:
-            print(e)
+            print('e', e)
             error_url_index.append(raw_urllist.index(url))
             error_urls.append(url)
             e_list.append(e)
