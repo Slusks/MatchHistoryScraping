@@ -29,22 +29,22 @@ raw_headers_dict_lpl = {"name": "player","hero":"champion","kill":"kills","death
 # 
 #Alphabetizing the raw dictionaries of headers to make sure everything is always in the same order for output. 
 #This is apparently not very Pythonic
-def get_key(dic, val):
-    for key, value in dic.items():
-         if val == value:
-             return key
+#def get_key(dic, val):
+#    for key, value in dic.items():
+#        if val == value:
+#             return key
 
-def sort_dictionary(in_dict):
-    y = list(in_dict.values())
-    new_d = {}
-    y_sorted = sorted(y)
-    for i in y_sorted:
-        key = get_key(in_dict,i)
-        new_d[key] = i
-    return(new_d)
+# def sort_dictionary(in_dict):
+#     y = list(in_dict.values())
+#     new_d = {}
+#     y_sorted = sorted(y)
+#     for i in y_sorted:
+#         key = get_key(in_dict,i)
+#         new_d[key] = i
+#     return(new_d)
 
-full_headers_dict = sort_dictionary(raw_headers_dict)
-full_headers_dict_lpl = sort_dictionary(raw_headers_dict_lpl)
+# full_headers_dict = sort_dictionary(raw_headers_dict)
+# full_headers_dict_lpl = sort_dictionary(raw_headers_dict_lpl)
 
 # coding: utf-8
 #!/usr/bin/env python3
@@ -98,11 +98,11 @@ def sort_dictionary(in_dict):
     return(new_d)
 
 #get alphabetized headers dictionary
-a_full_headers_dict_lpl = sort_dictionary(full_headers_dict_lpl)
+a_full_headers_dict_lpl = sort_dictionary(raw_headers_dict_lpl)
 a_keys = a_full_headers_dict_lpl.keys()
 
 #alphabetized non-lpl headers
-a_full_headers_dict = sort_dictionary(full_headers_dict)
+a_full_headers_dict = sort_dictionary(raw_headers_dict)
 b_keys = a_full_headers_dict.keys()
 
 user_cookie = dict()
@@ -127,8 +127,8 @@ for i in champ_name:
 # z = ["gameId"]
 # table_headings = x+headers_list+z
 
-headers_list = list(full_headers_dict.keys())
-headers_list_lpl = list(full_headers_dict_lpl.keys())
+headers_list = list(a_full_headers_dict.keys())
+headers_list_lpl = list(a_full_headers_dict_lpl.keys())
 
 ###############################################################################################################################################################
 ######################################  Gen Functions #########################################################################################################
@@ -182,15 +182,19 @@ def get_data(json_content, test):
         champion_id = json_content["participants"][count]["championId"] #str
         gameId = json_content["gameId"] #str
         teamId = json_content["participants"][count]["teamId"]#str
-        outputlist.append(player)
-        outputlist.append(teamId)
-        outputlist.append(champ_key_dict[str(champion_id)])
-        for i in  full_headers_dict:
-            if i =='championId' or 'gameId':
-                pass
+        for i in  a_full_headers_dict.keys():
+            if i =='championId':
+                outputlist.append(champ_key_dict[str(champion_id)])
+            elif i == 'gameId':
+                outputlist.append(gameId)
+            elif i == 'summonerName':
+                 outputlist.append(player)
+            elif i =='teamId':
+                outputlist.append(teamId)
             elif i in headers_list:
                 outputlist.append(json_content["participants"][count]["stats"][i])
-        outputlist.append(gameId)
+            else:
+                outputlist.append("None")
         list_list.append(outputlist)
         count += 1
         print('count:', count)
@@ -278,7 +282,7 @@ on_Laptop = True
 if on_Laptop:
     database_file = r'C:/Users/samsl/Desktop/ScrapeTest/databaseV3.csv'
     test_database_file = r'C:/Users/samsl/Desktop/ScrapeTest/test_databaseV3.csv'
-    temp_file = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2.csv'
+    temp_file = r'C:/Users/samsl/Desktop/ScrapeTest/scrapeV2.csv'
 
     database_file_lpl = r'C:/Users/samsl/Desktop/ScrapeTest/databaseV3_lpl.csv'
     test_database_file_lpl = r'C:/Users/samsl/Desktop/ScrapeTest/test_databaseV3_lpl.csv'
@@ -293,7 +297,7 @@ elif not on_Laptop:
     temp_file = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2.csv'
 
     database_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/databaseV3_lpl.csv'
-    test_database_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/test_databaseV3_lpl.csv'
+    test_database_file_lpl = r'C:/Users/samsl/Desktop/ScrapeTest/test_databaseV3_lpl.csv'
     temp_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2_lpl.csv'
 
     master_file = r'C:/Users/sam/Desktop/ScrapeTest/master_combined_database.csv'
@@ -310,9 +314,9 @@ error_urls =[]
 e_list = []
 for url in raw_urllist:
     if not_lpl(url):
-        try:
+        try: #this is only working for one match at the moment. 
             content = get_match_data(url, False) #url, test
-            data_list = get_data(content, False)
+            data_list = get_data(content, True)
             print('data_list')
             write_to_csv(data_list, temp_file)
             combine_csv(temp_file, test_database_file)
@@ -329,7 +333,7 @@ for url in raw_urllist:
         try:
             content = get_match_data_lpl(url, False) #url, test, lpl content
             data_list = get_data_lpl(content, True)
-            write_to_csv(data_list), temp_file_lpl
+            write_to_csv(data_list, temp_file_lpl)
             combine_csv(temp_file_lpl, test_database_file_lpl)
             iteration_count = iteration_count + 1
             print("completed:", iteration_count)
