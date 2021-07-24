@@ -1,14 +1,14 @@
 import requests
 import re
+import sys
 from requests.auth import HTTPBasicAuth
 import time
 import pandas as pd
 import pprint
 from pathlib import Path #https://medium.com/@ageitgey/python-3-quick-tip-the-easy-way-to-deal-with-file-paths-on-windows-mac-and-linux-11a072b58d5f
-from cookie_monster import COOKIE
 import csv
-
-
+sys.path.insert(0, 'C:/Users/sam/Desktop/ScrapeTest')
+from cookie_monster import COOKIE
 
 #Variables and Headers - wont need this until we're processing the text files
 # format: scraped headers: oracle's elixer header
@@ -38,7 +38,9 @@ old_raw_urllist = [
 "https://matchhistory.br.leagueoflegends.com/pt/#match-details/ESPORTSTMNT03/570139?gameHash=ba727c1db6d1cfbb&amp;tab=overview",
 "https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT05/1540037?gameHash=df189f4cefd8bfea&amp;tab=overview",
 "http://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT06/1160644?gameHash=744c3e9779ad519c&amp;tab=overview,Unnamed: 31",
-"https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT02/660033?gameHash=3ae31e7697461999&amp;tab=overview,False"]
+"https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT02/660033?gameHash=3ae31e7697461999&amp;tab=overview,False",
+"https://matchhistory.na.leagueoflegends.com/en/#match-details/NA1/3695017432/246666621?tab=overview",
+"https://matchhistory.euw.leagueoflegends.com/en/#match-details/EUW1/4702645805/219539932?tab=overview"]
 
 single_url = "https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT02/660033?gameHash=3ae31e7697461999&amp;tab=overview,False"
 
