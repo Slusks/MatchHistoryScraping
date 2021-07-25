@@ -14,8 +14,9 @@ from cookie_monster import COOKIE
 
 ###Basically, key = scraped value, value = table output value
 full_headers_dict = {"summonerName":"player", "championId": "champion", "magicDamageDealt":"totalmagicdamagedealt", "physicalDamageDealt":"totalphysicaldamagedealt", "physicalDamageTaken":"physicaldamagetaken", "kills":"kills","deaths":"deaths","assists":"assists", 'firstBloodKill': 'firstblood', 'totalDamageDealtToChampions': 'totaldamagetochampions', 'physicalDamageDealtToChampions': 'physicaldamagetochampions', 'magicDamageDealtToChampions': 'magicdamagetochampions', 'trueDamageDealtToChampions': 'truedamagetochampions', 'damageDealtToObjectives': 'totaldamagetoobjectives', 'damageDealtToTurrets': 'totaldamagetoturrets', 'totalHeal': 'damagehealed', 'totalDamageTaken': 'damagetaken', 'magicalDamageTaken': 'magicdamagetaken', 'wardsKilled': 'wardsdestroyed', 'sightWardsBoughtInGame': 'stealthwardspurchased', 'visionWardsBoughtInGame': 'controlwardspurchased', 'totalMinionsKilled': 'minionskilled', 'neutralMinionsKilledTeamJungle': "neutralminionskilledinteam'sjungle", 'neutralMinionsKilledEnemyJungle': 'neutralminionskilledinenemyjungle', 'killingSprees': 'killingsprees', 'longestTimeSpentLiving': 'longesttimespentliving', 'damageSelfMitigated': 'selfmitigateddamage', 'visionScore': 'visionscore', 'timeCCingOthers': 'timeccingothers', 'turretKills': 'totalTurretKills', 'inhibitorKills': 'totalInhibitorKills', 'totalTimeCrowdControlDealt': 'totaltimeapplyingcc', 'firstBloodAssist': 'firstbloodassist', 'firstTowerKill': 'firsttowerkill', 'firstTowerAssist': 'firsttowerassist', 'firstInhibitorKill': 'firstinhibkill', 'firstInhibitorAssist': 'firstinhibassist', 'doubleKills': 'doublekills', 'tripleKills': 'triplekills', 'quadraKills': 'quadrakills', 'pentaKills': 'pentakills', 'goldEarned':'goldearned', 'goldSpent': 'goldspent', "largestCriticalStrike":"largestcriticalstrike", "largestKillingSpree":"largestkillingspree", "largestMultiKill":"largestmultikill", "teamId":'side', 'gameId':'gameId'}
-
+lpl_full_headers_dict = {"name": "player","hero":"champion","kill":"kills","death":"deaths","assist":"assists",'firstBlood': 'firstblood', 'totalDamageToChamp': 'totaldamagetochampions', 'pDamageToChamp': 'physicaldamagetochampions', 'mDamageDealtToChamp': 'magicdamagetochampions', 'trueDamageDealtToChampions': 'truedamagetochampions', 'damageDealtToObjectives': 'totaldamagetoobjectives', 'damageDealtToTurrets': 'totaldamagetoturrets', 'totalHeal': 'damagehealed', 'totalDamageTaken': 'damagetaken', 'mDamageTaken': 'magicdamagetaken', 'wardsKilled': 'wardsdestroyed', 'sightWardsBoughtInGame': 'stealthwardspurchased', 'visionWardsBought': 'controlwardspurchased', 'lasthit': 'minionskilled', 'neutralKilledTJungle': "neutralminionskilledinteam'sjungle", 'neutralKilledEJungle': 'neutralminionskilledinenemyjungle', 'killingSprees': 'killingsprees', 'longestTimeSpentLiving': 'longesttimespentliving', 'damageSelfMitigated': 'selfmitigateddamage', 'visionScore': 'visionscore', 'timeCCingOthers': 'timeccingothers', 'towerKills': 'totalTurretKills', 'inhibitorKills': 'totalInhibitorKills', 'totalTimeCrowdControlDealt': 'totaltimeapplyingcc', 'firstBloodAssist': 'firstbloodassist', 'firstTowerKill': 'firsttowerkill', 'firstTowerAssist': 'firsttowerassist', 'firstInhibitorKill': 'firstinhibkill', 'firstInhibitorAssist': 'firstinhibassist', 'dKills': 'doublekills', 'tKills': 'triplekills', 'qKills': 'quadrakills', 'pKills': 'pentakills', 'side':'side', 'gold':'goldearned', 'GoldSpent': 'goldspent', "pDamageDealt":"totalphysicaldamagedealt", "pDamageTaken":"physicaldamagetaken", 'mDamageDealt':'totalmagicdamagedealt', 'largestCriticalStrike':'largestcriticalstrike',  "largestKillingSpree":"largestkillingspree", "largestMultiKill":"largestmultikill", 'game-id':'gameId'}
 scrape_headers = full_headers_dict.keys()
+lpl_scrape_headers = lpl_full_headers_dict.keys()
 table_headers = full_headers_dict.values()
 
 #Function that grabs the URL list from a csv
@@ -41,6 +42,8 @@ raw_urllist = [
 "https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT05/1540037?gameHash=df189f4cefd8bfea&amp;tab=overview",
 "http://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT06/1160644?gameHash=744c3e9779ad519c&amp;tab=overview,Unnamed: 31",
 "https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT02/660033?gameHash=3ae31e7697461999&amp;tab=overview,False",
+"https://lpl.qq.com/es/stats.shtml?bmid=7325",
+"https://lpl.qq.com/es/stats.shtml?bmid=6909",
 "https://matchhistory.na.leagueoflegends.com/en/#match-details/NA1/3695017432/246666621?tab=overview",
 "https://matchhistory.euw.leagueoflegends.com/en/#match-details/EUW1/4702645805/219539932?tab=overview"]
 
@@ -49,6 +52,15 @@ raw_urllist = [
 def url_for_request_scraping(raw_url):
     cut = raw_url.split("#match-details/")[1].split("&amp;tab=overview,Unnamed: 31False")[0]
     new_url = "https://acs.leagueoflegends.com/v1/stats/game/"+cut
+    return (new_url)
+
+def lpl_url_for_request_scraping(raw_url, test):
+    base_url = "https://lpl.qq.com/web201612/data/LOL_MATCH_DETAIL_"
+    js = ".js"
+    match_num = raw_url[-4:]
+    new_url = base_url + match_num + js
+    if test == True:
+        pprint.pprint(new_url)
     return (new_url)
 
 #2021 URL is going to need to look like this: https://acs.leagueoflegends.com/v1/stats/game/EUW1/4702645805?visiblePlatformId=EUW1&visibleAccountId=219539932
@@ -81,6 +93,15 @@ def get_match_data(url, test):
         pprint.pprint(json_content)
     return(json_content)
 
+def lpl_get_match_data(url, test):
+    good_url = lpl_url_for_request_scraping(url, False)
+    json_file = requests.get(good_url, cookies=user_cookie)
+    assert json_file.status_code == 200
+    json_content = json_file.json()
+    if test == True:
+        pprint.pprint(json_content)
+    return(json_content)
+
 def build_dataframe(input_match_data, test):
     json_content = input_match_data
     count = 0
@@ -100,6 +121,11 @@ def build_dataframe(input_match_data, test):
     if test == True:
         pprint.pprint(df)
     return(df)
+
+def lpl_build_dataframe(input_match_data, test):
+    json_content = input_match_data
+    
+
 
 def prune_dataframe(input_raw_dataframe, test):
     bad_df = input_raw_dataframe
@@ -132,6 +158,12 @@ def combine_csv(match_data, database_file, iteration_count, test):
         match_data_container = pd.read_csv(match_data, header=0, skiprows=[0], delimiter=',',encoding="utf-8-sig")
         match_data_container.to_csv(database_file, mode="a", index=False)
 
+#check if URL is lpl
+def lpl_check(url):
+    if "https://lpl.qq.com" in url:
+        return(True)
+    else:
+        return(False)
 
 on_Laptop = False
 
@@ -168,16 +200,20 @@ test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_database_V3.csv'
 iteration_count = 0
 start_time = time.time()
 for url in urllist:
-    try: #this currently works for Pre-2020, non-lpl urls and match data
-        full_match_data = get_match_data(url, False)
-        long_match_dataframe = build_dataframe(full_match_data, True)
-        short_match_dataframe = prune_dataframe(long_match_dataframe, False)
-        short_match_dataframe.rename(columns = full_headers_dict)
-        write_to_csv(short_match_dataframe, test_match_file)
-        combine_csv(test_match_file, test_database_file, iteration_count, False)
-        iteration_count = iteration_count + 1
-    except Exception as e:
-        print(e) 
+    if not lpl_check(url):
+        try: #this currently works for Pre-2020, non-lpl urls and match data
+            full_match_data = get_match_data(url, False)
+            long_match_dataframe = build_dataframe(full_match_data, True)
+            short_match_dataframe = prune_dataframe(long_match_dataframe, False)
+            short_match_dataframe.rename(columns = full_headers_dict)
+            write_to_csv(short_match_dataframe, test_match_file)
+            combine_csv(test_match_file, test_database_file, iteration_count, False)
+            iteration_count = iteration_count + 1
+        except Exception as e:
+            print(e)
+    elif  lpl_check(url):
+        print ('TBD')
+
     
  
 print("Run time:", time.time() - start_time )
