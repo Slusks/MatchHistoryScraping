@@ -84,6 +84,7 @@ for i in champ_name:
 
 ##PULLING DATA###
 ####### Pre 2021, Non-LPL data ######
+#returns json with full match data
 def get_match_data(url, test):
     good_url = url_for_request_scraping(url)
     json_file = requests.get(good_url, cookies=user_cookie)
@@ -93,11 +94,12 @@ def get_match_data(url, test):
         pprint.pprint(json_content)
     return(json_content)
 
+#returns json with full match data for LPL matches
 def lpl_get_match_data(url, test):
     good_url = lpl_url_for_request_scraping(url, False)
-    json_file = requests.get(good_url, cookies=user_cookie)
-    assert json_file.status_code == 200
-    json_content = json_file.json()
+    json_file = requests.get(good_url)
+    json_content = json.loads(json_file.text[12:-1]) # or demjson.decode(json_file.content[12:-1])
+    #assert json_file.status_code == 200
     if test == True:
         pprint.pprint(json_content)
     return(json_content)
