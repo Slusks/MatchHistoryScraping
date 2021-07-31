@@ -127,6 +127,12 @@ def prune_dataframe(input_raw_dataframe, test):
         pprint.pprint(good_df)    
     return (good_df)
 
+def fix_dataframe(dataframe):
+    bool_list = ["firstbloodassist","firstblood","firstinhibassist","firstinhibkill","firsttowerassist","firsttowerkill"]
+    for h in bool_list:
+        dataframe[h] = dataframe[h].apply(lambda x: 1 if x else 0)
+    return (dataframe)    
+
 ####LPL MODULES###
 def lpl_url_for_request_scraping(raw_url, test):
     base_url = "https://lpl.qq.com/web201612/data/LOL_MATCH_DETAIL_"
@@ -183,6 +189,7 @@ def lpl_prune_dataframe(input_raw_dataframe, test):
         if i not in lpl_scrape_headers:
             bad_keys.append(i)
     good_df = bad_df.drop(bad_keys, axis=1)
+    good_df['firstBlood'] = good_df['firstBlood'].apply(lambda x: 1 if x else 0)
     if test == True:
         pprint.pprint(good_df)    
     return (good_df)
@@ -196,8 +203,6 @@ def write_to_csv(data_list, output_file):
 
 #add content of temp csv file to database csv.
 def combine_csv(match_data, database_file, iteration_count, test):
-    print('combining csv')
-    print(iteration_count)
     if iteration_count == 0 or lpl_iteration_count == 0:
         with open(database_file, 'w+') as database_file:
             match_data_container = pd.read_csv(match_data, header=0, delimiter=',', encoding="utf-8-sig")
@@ -205,6 +210,9 @@ def combine_csv(match_data, database_file, iteration_count, test):
     else:
         match_data_container = pd.read_csv(match_data, header=0, skiprows=[0], delimiter=',',encoding="utf-8-sig")
         match_data_container.to_csv(database_file, mode="a", index=False)
+    if test == True:
+            print('combining csv')
+            print(iteration_count)
 
 #check if URL is lpl
 def lpl_check(url):
@@ -254,9 +262,10 @@ for url in urllist:
     if not lpl_check(url):
         try: #this currently works for Pre-2020, non-lpl urls and match data
             full_match_data = get_match_data(url, False)
-            long_match_dataframe = build_dataframe(full_match_data, True)
+            long_match_dataframe = build_dataframe(full_match_data, False)
             short_match_dataframe = prune_dataframe(long_match_dataframe, False)
-            short_match_dataframe.rename(columns = full_headers_dict)
+            short_match_dataframe = short_match_dataframe.rename(columns = full_headers_dict) #this is returning a dataframe, might need to combine dataframes before dropping to csv for lpl
+            short_match_dataframe = fix_dataframe(short_match_dataframe)
             write_to_csv(short_match_dataframe, test_match_file)
             combine_csv(test_match_file, test_database_file, iteration_count, False)
             iteration_count = iteration_count + 1
@@ -265,9 +274,9 @@ for url in urllist:
     elif lpl_check(url):
         try: #this currently works for Pre-2020, non-lpl urls and match data
             full_match_data = lpl_get_match_data(url, False)
-            long_match_dataframe = lpl_build_dataframe(full_match_data, True)
+            long_match_dataframe = lpl_build_dataframe(full_match_data, False)
             short_match_dataframe = lpl_prune_dataframe(long_match_dataframe, False)
-            short_match_dataframe.rename(columns = lpl_full_headers_dict)
+            short_match_dataframe = short_match_dataframe.rename(columns = lpl_full_headers_dict) #this is returning a dataframe, might need to combine dataframes before dropping to csv for lpl
             write_to_csv(short_match_dataframe, lpl_test_match_file)
             combine_csv(lpl_test_match_file, lpl_test_database_file, lpl_iteration_count, False)
             lpl_iteration_count = lpl_iteration_count + 1
