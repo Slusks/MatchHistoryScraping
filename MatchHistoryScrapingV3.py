@@ -94,16 +94,6 @@ def get_match_data(url, test):
         pprint.pprint(json_content)
     return(json_content)
 
-#returns json with full match data for LPL matches
-def lpl_get_match_data(url, test):
-    good_url = lpl_url_for_request_scraping(url, False)
-    json_file = requests.get(good_url)
-    json_content = json.loads(json_file.text[12:-1]) # or demjson.decode(json_file.content[12:-1])
-    #assert json_file.status_code == 200
-    if test == True:
-        pprint.pprint(json_content)
-    return(json_content)
-
 def build_dataframe(input_match_data, test):
     json_content = input_match_data
     count = 0
@@ -124,10 +114,6 @@ def build_dataframe(input_match_data, test):
         pprint.pprint(df)
     return(df)
 
-def lpl_build_dataframe(input_match_data, test):
-    json_content = input_match_data
-    
-
 
 def prune_dataframe(input_raw_dataframe, test):
     bad_df = input_raw_dataframe
@@ -135,6 +121,66 @@ def prune_dataframe(input_raw_dataframe, test):
     bad_keys = []
     for i in all_columns:
         if i not in scrape_headers:
+            bad_keys.append(i)
+    good_df = bad_df.drop(bad_keys, axis=1)
+    if test == True:
+        pprint.pprint(good_df)    
+    return (good_df)
+
+####LPL MODULES###
+def lpl_url_for_request_scraping(raw_url, test):
+    base_url = "https://lpl.qq.com/web201612/data/LOL_MATCH_DETAIL_"
+    js = ".js"
+    match_num = raw_url[-4:]
+    new_url = base_url + match_num + js
+    if test == True:
+        pprint.pprint(new_url)
+    return (new_url)
+
+#Get the lpl json data. 
+def lpl_get_match_data(url, test):
+    good_url = lpl_url_for_request_scraping(url, False)
+    json_file = requests.get(good_url)
+    json_content = json.loads(json_file.text[12:-1]) # or demjson.decode(json_file.content[12:-1])
+    #assert json_file.status_code == 200
+    if test == True:
+        pprint.pprint(json_content)
+    return(json_content)
+
+def lpl_build_dataframe(input_match_data, test):
+    jd = json.loads(input_match_data["sMatchInfo"][0]['battleInfo']['BattleData'])
+    #'bMatchId' is what matches the URL
+    side = 'left'
+    count = 0
+    records = 0
+    while records < 10:
+        if count == 5:
+            count = 0
+            side = 'right'
+        else:
+            player_info = jd[side]['players'][count]
+            champion_name = champ_key_dict[str(player_info['hero'])]
+            gameId = json.loads(input_match_data['bMatchId'])
+            player_info.update({"hero": champion_name , "gameId": gameId})
+            if count == 0 and records == 0:
+                df = pd.DataFrame([player_info])
+                records = records + 1
+                count = count + 1
+            else:
+                new_df = pd.DataFrame([player_info])
+                count = count + 1
+                records = records + 1
+                df = df.append(new_df)
+    if test == True:
+        pprint.pprint(df) 
+    return (df)
+
+def lpl_prune_dataframe(input_raw_dataframe, test):
+    bad_df = input_raw_dataframe
+    all_columns = bad_df.columns.values.tolist()
+    bad_keys = []
+    for i in all_columns:
+        if i not in lpl_scrape_headers:
             bad_keys.append(i)
     good_df = bad_df.drop(bad_keys, axis=1)
     if test == True:
@@ -152,7 +198,7 @@ def write_to_csv(data_list, output_file):
 def combine_csv(match_data, database_file, iteration_count, test):
     print('combining csv')
     print(iteration_count)
-    if iteration_count == 0:
+    if iteration_count == 0 or lpl_iteration_count == 0:
         with open(database_file, 'w+') as database_file:
             match_data_container = pd.read_csv(match_data, header=0, delimiter=',', encoding="utf-8-sig")
             match_data_container.to_csv(database_file, mode="a", index=False)
@@ -199,7 +245,10 @@ on_Laptop = False
 urllist = raw_urllist #setting this as a variable so i can switch between this and other urllists      
 test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test_match_file_V3.csv'
 test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_database_V3.csv'
+lpl_test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_match_file_V3.csv'
+lpl_test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_database_V3.csv'
 iteration_count = 0
+lpl_iteration_count = 0
 start_time = time.time()
 for url in urllist:
     if not lpl_check(url):
@@ -212,11 +261,19 @@ for url in urllist:
             combine_csv(test_match_file, test_database_file, iteration_count, False)
             iteration_count = iteration_count + 1
         except Exception as e:
-            print(e)
-    elif  lpl_check(url):
-        print ('TBD')
-
+            print("non-lpl, pre-2021", e)
+    elif lpl_check(url):
+        try: #this currently works for Pre-2020, non-lpl urls and match data
+            full_match_data = lpl_get_match_data(url, False)
+            long_match_dataframe = lpl_build_dataframe(full_match_data, True)
+            short_match_dataframe = lpl_prune_dataframe(long_match_dataframe, False)
+            short_match_dataframe.rename(columns = lpl_full_headers_dict)
+            write_to_csv(short_match_dataframe, lpl_test_match_file)
+            combine_csv(lpl_test_match_file, lpl_test_database_file, lpl_iteration_count, False)
+            lpl_iteration_count = lpl_iteration_count + 1
+        except Exception as e:
+            print("lpl", e)
     
  
 print("Run time:", time.time() - start_time )
-print("records:", iteration_count)
+print("records:", iteration_count + lpl_iteration_count)
