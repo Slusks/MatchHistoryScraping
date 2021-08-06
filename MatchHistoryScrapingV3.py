@@ -114,7 +114,7 @@ def build_dataframe(input_match_data, test):
         pprint.pprint(df)
     return(df)
 
-
+#Remove all of the columns that we're not tracking
 def prune_dataframe(input_raw_dataframe, test):
     bad_df = input_raw_dataframe
     all_columns = bad_df.columns.values.tolist()
@@ -127,6 +127,7 @@ def prune_dataframe(input_raw_dataframe, test):
         pprint.pprint(good_df)    
     return (good_df)
 
+#This function modifies Boolean values to 1's/0's
 def fix_dataframe(dataframe):
     bool_list = ["firstbloodassist","firstblood","firstinhibassist","firstinhibkill","firsttowerassist","firsttowerkill"]
     for h in bool_list:
@@ -266,7 +267,7 @@ for url in urllist:
             short_match_dataframe = prune_dataframe(long_match_dataframe, False)
             short_match_dataframe = short_match_dataframe.rename(columns = full_headers_dict) #this is returning a dataframe, might need to combine dataframes before dropping to csv for lpl
             short_match_dataframe = fix_dataframe(short_match_dataframe)
-            write_to_csv(short_match_dataframe, test_match_file)
+            write_to_csv(short_match_dataframe, test_match_file) #does this need to exist or can we just drop the panda dataframes into the CSV?
             combine_csv(test_match_file, test_database_file, iteration_count, False)
             iteration_count = iteration_count + 1
         except Exception as e:
