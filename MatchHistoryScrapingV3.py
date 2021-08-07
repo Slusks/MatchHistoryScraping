@@ -13,7 +13,7 @@ sys.path.insert(0, 'C:/Users/sam/Desktop/ScrapeTest')
 from cookie_monster import COOKIE
 
 ###Basically, key = scraped value, value = table output value
-full_headers_dict = {"summonerName":"player", "championId": "champion", "magicDamageDealt":"totalmagicdamagedealt", "physicalDamageDealt":"totalphysicaldamagedealt", "physicalDamageTaken":"physicaldamagetaken", "kills":"kills","deaths":"deaths","assists":"assists", 'firstBloodKill': 'firstblood', 'totalDamageDealtToChampions': 'totaldamagetochampions', 'physicalDamageDealtToChampions': 'physicaldamagetochampions', 'magicDamageDealtToChampions': 'magicdamagetochampions', 'trueDamageDealtToChampions': 'truedamagetochampions', 'damageDealtToObjectives': 'totaldamagetoobjectives', 'damageDealtToTurrets': 'totaldamagetoturrets', 'totalHeal': 'damagehealed', 'totalDamageTaken': 'damagetaken', 'magicalDamageTaken': 'magicdamagetaken', 'wardsKilled': 'wardsdestroyed', 'sightWardsBoughtInGame': 'stealthwardspurchased', 'visionWardsBoughtInGame': 'controlwardspurchased', 'totalMinionsKilled': 'minionskilled', 'neutralMinionsKilledTeamJungle': "neutralminionskilledinteam'sjungle", 'neutralMinionsKilledEnemyJungle': 'neutralminionskilledinenemyjungle', 'killingSprees': 'killingsprees', 'longestTimeSpentLiving': 'longesttimespentliving', 'damageSelfMitigated': 'selfmitigateddamage', 'visionScore': 'visionscore', 'timeCCingOthers': 'timeccingothers', 'turretKills': 'totalTurretKills', 'inhibitorKills': 'totalInhibitorKills', 'totalTimeCrowdControlDealt': 'totaltimeapplyingcc', 'firstBloodAssist': 'firstbloodassist', 'firstTowerKill': 'firsttowerkill', 'firstTowerAssist': 'firsttowerassist', 'firstInhibitorKill': 'firstinhibkill', 'firstInhibitorAssist': 'firstinhibassist', 'doubleKills': 'doublekills', 'tripleKills': 'triplekills', 'quadraKills': 'quadrakills', 'pentaKills': 'pentakills', 'goldEarned':'goldearned', 'goldSpent': 'goldspent', "largestCriticalStrike":"largestcriticalstrike", "largestKillingSpree":"largestkillingspree", "largestMultiKill":"largestmultikill", "teamId":'side', 'gameId':'gameid'}
+full_headers_dict = {"summonerName":"player", "championId": "champion", "magicDamageDealt":"totalmagicdamagedealt", "physicalDamageDealt":"totalphysicaldamagedealt", "physicalDamageTaken":"physicaldamagetaken", "kills":"kills","deaths":"deaths","assists":"assists", 'firstBloodKill': 'firstblood', 'totalDamageDealtToChampions': 'totaldamagetochampions', 'physicalDamageDealtToChampions': 'physicaldamagetochampions', 'magicDamageDealtToChampions': 'magicdamagetochampions', 'trueDamageDealtToChampions': 'truedamagetochampions', 'damageDealtToObjectives': 'totaldamagetoobjectives', 'damageDealtToTurrets': 'totaldamagetoturrets', 'totalHeal': 'damagehealed', 'totalDamageTaken': 'damagetaken', 'magicalDamageTaken': 'magicdamagetaken', 'wardsKilled': 'wardsdestroyed', 'sightWardsBoughtInGame': 'stealthwardspurchased', 'visionWardsBoughtInGame': 'controlwardspurchased', 'totalMinionsKilled': 'minionskilled', 'neutralMinionsKilledTeamJungle': "neutralminionskilledinteam'sjungle", 'neutralMinionsKilledEnemyJungle': 'neutralminionskilledinenemyjungle', 'killingSprees': 'killingsprees', 'longestTimeSpentLiving': 'longesttimespentliving', 'damageSelfMitigated': 'selfmitigateddamage', 'visionScore': 'visionscore', 'timeCCingOthers': 'timeccingothers', 'turretKills': 'totalTurretKills', 'inhibitorKills': 'totalInhibitorKills', 'totalTimeCrowdControlDealt': 'totaltimeapplyingcc', 'firstBloodAssist': 'firstbloodassist', 'firstTowerKill': 'firsttowerkill', 'firstTowerAssist': 'firsttowerassist', 'firstInhibitorKill': 'firstinhibkill', 'doubleKills': 'doublekills', 'tripleKills': 'triplekills', 'quadraKills': 'quadrakills', 'pentaKills': 'pentakills', 'goldEarned':'goldearned', 'goldSpent': 'goldspent', "largestCriticalStrike":"largestcriticalstrike", "largestKillingSpree":"largestkillingspree", "largestMultiKill":"largestmultikill", "teamId":'side', 'gameId':'gameid'}
 lpl_full_headers_dict = {"name": "player","hero":"champion","kill":"kills","death":"deaths","assist":"assists",'firstBlood': 'firstblood', 'totalDamageToChamp': 'totaldamagetochampions', 'pDamageToChamp': 'physicaldamagetochampions', 'mDamageDealtToChamp': 'magicdamagetochampions', 'trueDamageDealtToChampions': 'truedamagetochampions', 'damageDealtToObjectives': 'totaldamagetoobjectives', 'damageDealtToTurrets': 'totaldamagetoturrets', 'totalHeal': 'damagehealed', 'totalDamageTaken': 'damagetaken', 'mDamageTaken': 'magicdamagetaken', 'wardsKilled': 'wardsdestroyed', 'sightWardsBoughtInGame': 'stealthwardspurchased', 'visionWardsBought': 'controlwardspurchased', 'lasthit': 'minionskilled', 'neutralKilledTJungle': "neutralminionskilledinteam'sjungle", 'neutralKilledEJungle': 'neutralminionskilledinenemyjungle', 'killingSprees': 'killingsprees', 'longestTimeSpentLiving': 'longesttimespentliving', 'damageSelfMitigated': 'selfmitigateddamage', 'visionScore': 'visionscore', 'timeCCingOthers': 'timeccingothers', 'towerKills': 'totalTurretKills', 'inhibitorKills': 'totalInhibitorKills', 'totalTimeCrowdControlDealt': 'totaltimeapplyingcc', 'firstBloodAssist': 'firstbloodassist', 'firstTowerKill': 'firsttowerkill', 'firstTowerAssist': 'firsttowerassist', 'firstInhibitorKill': 'firstinhibkill', 'firstInhibitorAssist': 'firstinhibassist', 'dKills': 'doublekills', 'tKills': 'triplekills', 'qKills': 'quadrakills', 'pKills': 'pentakills', 'side':'side', 'gold':'goldearned', 'GoldSpent': 'goldspent', "pDamageDealt":"totalphysicaldamagedealt", "pDamageTaken":"physicaldamagetaken", 'mDamageDealt':'totalmagicdamagedealt', 'largestCriticalStrike':'largestcriticalstrike',  "largestKillingSpree":"largestkillingspree", "largestMultiKill":"largestmultikill", 'gameId':'gameid'}
 scrape_headers = full_headers_dict.keys()
 lpl_scrape_headers = lpl_full_headers_dict.keys()
@@ -35,7 +35,6 @@ def get_urllist():
 # instance of my internet browser to requests. Then that let's me scrape the data I need.
 #You should be able to use this as the basis for a script that lets you iterate over a 
 # number of URLs for the json files, by replacing the get request with a for loop.
-
 
 raw_urllist = [
 "https://matchhistory.br.leagueoflegends.com/pt/#match-details/ESPORTSTMNT03/570139?gameHash=ba727c1db6d1cfbb&amp;tab=overview",
@@ -98,11 +97,12 @@ def build_dataframe(input_match_data, test):
     json_content = input_match_data
     count = 0
     while count < 10:
+        player = json_content["participantIdentities"][count]["player"]["summonerName"]
         champion_id = json_content["participants"][count]["championId"]
         champion_name = champ_key_dict[str(champion_id)]
         gameId = json_content["gameId"]
         stats = json_content["participants"][count]["stats"]
-        stats.update({"championId": champion_name , "gameId": gameId})
+        stats.update({"championId": champion_name , "gameId": gameId, "summonerName":player})
         if count == 0:
             df = pd.DataFrame([stats])
             count = count + 1
@@ -204,7 +204,7 @@ def write_to_csv(data_list, output_file):
 
 #add content of temp csv file to database csv.
 def combine_csv(match_data, database_file, iteration_count, test):
-    if iteration_count == 0 or lpl_iteration_count == 0:
+    if iteration_count == 0:
         with open(database_file, 'w+') as database_file:
             match_data_container = pd.read_csv(match_data, header=0, delimiter=',', encoding="utf-8-sig")
             match_data_container.to_csv(database_file, mode="a", index=False)
@@ -251,13 +251,16 @@ on_Laptop = False
 
 
 #### RUNNING FILES ##########
-urllist = raw_urllist #setting this as a variable so i can switch between this and other urllists      
+urllist = get_urllist() #raw_urllist #setting this as a variable so i can switch between this and other urllists      
 test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test_match_file_V3.csv'
 test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_database_V3.csv'
 lpl_test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_match_file_V3.csv'
 lpl_test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_database_V3.csv'
+error_file = r'C:/Users/sam/Desktop/ScrapeTest/error_urls.csv'
 iteration_count = 0
 lpl_iteration_count = 0
+total_iteration = lpl_iteration_count + iteration_count
+bad_urllist = []
 start_time = time.time()
 for url in urllist:
     if not lpl_check(url):
@@ -271,7 +274,12 @@ for url in urllist:
             combine_csv(test_match_file, test_database_file, iteration_count, False)
             iteration_count = iteration_count + 1
         except Exception as e:
+            bad_urllist.append(url)
             print("non-lpl, pre-2021", e)
+        if iteration_count % 50 == 0:
+            print ('iteration_count', iteration_count)
+        else:
+            pass
     elif lpl_check(url):
         try: #this currently works for Pre-2020, non-lpl urls and match data
             full_match_data = lpl_get_match_data(url, False)
@@ -283,7 +291,15 @@ for url in urllist:
             lpl_iteration_count = lpl_iteration_count + 1
         except Exception as e:
             print("lpl", e)
-    
- 
+        if iteration_count % 50 == 0:
+            print ('lpl_iteration_count', lpl_iteration_count)
+        else:
+            pass
+        
+with open(error_file, 'w+', newline='') as f:
+    write = csv.writer(f)
+    write.writerows(bad_urllist)
+
 print("Run time:", time.time() - start_time )
 print("records:", iteration_count + lpl_iteration_count)
+
