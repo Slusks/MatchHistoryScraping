@@ -336,7 +336,7 @@ start_time = time.time()
 for url in urllist:
     if not lpl_check(url):
         try:
-            amateur = amateur_check
+            amateur = amateur_check()
             if amateur:
                 full_match_data = amateur_get_match_data(url, False) #this has to build the URL differently to get the amateur info
                 long_match_dataframe = amateur_build_dataframe(full_match_data, False) #builds the data with a different value in player
