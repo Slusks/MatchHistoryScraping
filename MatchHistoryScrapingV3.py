@@ -22,10 +22,14 @@ table_headers = full_headers_dict.values()
 #Function that grabs the URL list from a csv
 def get_urllist():
     l = []
-    url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/data/all_url.csv"
+    #url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/data/all_url.csv"
+    url_file = r"C:/Users/sam/Desktop/ScrapeTest/all_urls2.csv"
     file = pd.read_csv(url_file, header=0)
     l = list(file.url)
     single = list(set(l))
+    for i in single:
+        if type(i) != str:
+            single.remove(i)
     print(len(single))
     return (single)
 
@@ -318,7 +322,7 @@ on_Laptop = False
 
 
 #### RUNNING FILES ##########
-urllist = get_urllist() #raw_urllist #setting this as a variable so i can switch between this and other urllists      
+urllist = get_urllist() #raw_urllist #setting this as a variable so i can switch between this and other urllists
 test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test_match_file_V3.csv'
 test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_database_V3.csv'
 lpl_test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_match_file_V3.csv'
@@ -331,7 +335,7 @@ bad_urllist = []
 start_time = time.time()
 for url in urllist:
     if not lpl_check(url):
-        try: #this currently works for Pre-2020, non-lpl urls and match data
+        try:
             amateur = amateur_check
             if amateur:
                 full_match_data = amateur_get_match_data(url, False) #this has to build the URL differently to get the amateur info
@@ -352,7 +356,6 @@ for url in urllist:
             print ('iteration_count', iteration_count)
         else:
             pass
-
     elif lpl_check(url):
         try: #this currently works for Pre-2020, non-lpl urls and match data
             full_match_data = lpl_get_match_data(url, False)
