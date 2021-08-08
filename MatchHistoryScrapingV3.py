@@ -22,7 +22,7 @@ table_headers = full_headers_dict.values()
 #Function that grabs the URL list from a csv
 def get_urllist():
     l = []
-    url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/data/URL.csv"
+    url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/data/all_url.csv"
     file = pd.read_csv(url_file, header=0)
     l = list(file.url)
     single = list(set(l))
@@ -62,7 +62,20 @@ def lpl_url_for_request_scraping(raw_url, test):
         pprint.pprint(new_url)
     return (new_url)
 
-#2021 URL is going to need to look like this: https://acs.leagueoflegends.com/v1/stats/game/EUW1/4702645805?visiblePlatformId=EUW1&visibleAccountId=219539932
+#amateur matches are played on the normal server so they apparently have a different kind of url
+def amateur_url_for_request_scraping(raw_url):
+    if "/NA1/" in raw_url:
+        cut = raw_url.split("#match-details/")[1].split("/")[:-1]
+        end = raw_url.split("/")[-1].split("?")[0]
+        new_url = "https://acs.leagueoflegends.com/v1/stats/game/" + cut[0] + "/" +  cut[1] + "?visiblePlatformId=NA1&visibleAccountId=" + end
+        return (new_url)
+    elif "/EUW1/" in raw_url:
+        cut = raw_url.split("#match-details/")[1].split("/")[:-1]
+        end = raw_url.split("/")[-1].split("?")[0]
+        new_url = "https://acs.leagueoflegends.com/v1/stats/game/" + cut[0] + "/" +  cut[1] + "?visiblePlatformId=EUW1&visibleAccountId=" + end
+        return (new_url)
+
+
 # Parsing 2021 JSON is also probably going to be new.
 
 # Format your cookie into a dictionary form
@@ -128,11 +141,16 @@ def prune_dataframe(input_raw_dataframe, test):
     return (good_df)
 
 #This function modifies Boolean values to 1's/0's
-def fix_dataframe(dataframe):
-    bool_list = ["firstbloodassist","firstblood","firstinhibassist","firstinhibkill","firsttowerassist","firsttowerkill"]
-    for h in bool_list:
-        dataframe[h] = dataframe[h].apply(lambda x: 1 if x else 0)
-    return (dataframe)    
+def fix_dataframe(dataframe, amateur):
+    if amateur:
+        positions = {"TOP, SOLO":"top", "MIDDLE, SOLO":"mid", "JUNGLE, NONE":"jng", "BOTTOM, DUO_CARRY":"bot", "BOTTOM, DUO_SUPPORT":"sup"}
+        dataframe["summonerName"] = dataframe["summonerName"].apply(lambda x: positions[x])
+        dataframe["win"] = dataframe["summonerName"].apply(lambda x: 1 if x else 0)
+    else:
+        bool_list = ["firstbloodassist","firstblood","firstinhibassist","firstinhibkill","firsttowerassist","firsttowerkill"]
+        for h in bool_list:
+            dataframe[h] = dataframe[h].apply(lambda x: 1 if x else 0)
+    return (dataframe)
 
 ####LPL MODULES###
 def lpl_url_for_request_scraping(raw_url, test):
@@ -195,6 +213,55 @@ def lpl_prune_dataframe(input_raw_dataframe, test):
         pprint.pprint(good_df)    
     return (good_df)
 #######################################
+
+####AMATEUR DATA####
+#Check if url is amateur
+def amateur_check(url):
+    if "ESPORTS" in url:
+        return (False)
+    else:
+        return (True)
+
+def amateur_get_match_data(url, test):
+    good_url = amateur_url_for_request_scraping(url)
+    json_file = requests.get(good_url, cookies=user_cookie)
+    assert json_file.status_code == 200
+    json_content = json_file.json()
+    if test == True:
+        pprint.pprint(json_content)
+    return(json_content)
+
+def amateur_build_dataframe(input_match_data, test):
+    json_content = input_match_data
+    count = 0
+    while count < 10:
+        role = json_content['participants'][count]['timeline']['role']
+        lane = json_content['participants'][count]['timeline']['lane']
+        if role:
+            player = lane +", " + role
+        else:
+            player =  lane
+        champion_id = json_content["participants"][count]["championId"]
+        champion_name = champ_key_dict[str(champion_id)]
+        gameId = json_content["gameId"]
+        stats = json_content["participants"][count]["stats"]
+        stats.update({"championId": champion_name , "gameId": gameId, "summonerName":player})
+        if count == 0:
+            df = pd.DataFrame([stats])
+            count = count + 1
+        else:
+            new_df = pd.DataFrame([stats])
+            count = count + 1
+            df = df.append(new_df) 
+    if test == True:
+        pprint.pprint(df)
+    return(df)
+
+# Amateur should otherwise reuse the other non-LPL functions
+#prune_dataframe
+#fix_dataframe
+
+####################
 
 ### Writing Data 
 #write lists to temp CSV
@@ -265,11 +332,16 @@ start_time = time.time()
 for url in urllist:
     if not lpl_check(url):
         try: #this currently works for Pre-2020, non-lpl urls and match data
-            full_match_data = get_match_data(url, False)
-            long_match_dataframe = build_dataframe(full_match_data, False)
+            amateur = amateur_check
+            if amateur:
+                full_match_data = amateur_get_match_data(url, False) #this has to build the URL differently to get the amateur info
+                long_match_dataframe = amateur_build_dataframe(full_match_data, False) #builds the data with a different value in player
+            else:
+                full_match_data = get_match_data(url, False)
+                long_match_dataframe = build_dataframe(full_match_data, False)
             short_match_dataframe = prune_dataframe(long_match_dataframe, False)
-            short_match_dataframe = short_match_dataframe.rename(columns = full_headers_dict) #this is returning a dataframe, might need to combine dataframes before dropping to csv for lpl
-            short_match_dataframe = fix_dataframe(short_match_dataframe)
+            short_match_dataframe = short_match_dataframe.rename(columns = full_headers_dict) 
+            short_match_dataframe = fix_dataframe(short_match_dataframe, amateur)
             write_to_csv(short_match_dataframe, test_match_file) #does this need to exist or can we just drop the panda dataframes into the CSV?
             combine_csv(test_match_file, test_database_file, iteration_count, False)
             iteration_count = iteration_count + 1
@@ -280,6 +352,7 @@ for url in urllist:
             print ('iteration_count', iteration_count)
         else:
             pass
+
     elif lpl_check(url):
         try: #this currently works for Pre-2020, non-lpl urls and match data
             full_match_data = lpl_get_match_data(url, False)
