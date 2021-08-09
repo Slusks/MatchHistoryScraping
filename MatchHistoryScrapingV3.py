@@ -9,6 +9,7 @@ import pprint
 from pathlib import Path #https://medium.com/@ageitgey/python-3-quick-tip-the-easy-way-to-deal-with-file-paths-on-windows-mac-and-linux-11a072b58d5f
 import csv
 import json
+import traceback
 sys.path.insert(0, 'C:/Users/sam/Desktop/ScrapeTest')
 from cookie_monster import COOKIE
 
@@ -22,7 +23,7 @@ table_headers = full_headers_dict.values()
 #Function that grabs the URL list from a csv
 def get_urllist():
     l = []
-    #url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/data/all_url.csv"
+    #url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/data/URL.csv"
     url_file = r"C:/Users/sam/Desktop/ScrapeTest/all_urls2.csv"
     file = pd.read_csv(url_file, header=0)
     l = list(file.url)
@@ -68,16 +69,16 @@ def lpl_url_for_request_scraping(raw_url, test):
 
 #amateur matches are played on the normal server so they apparently have a different kind of url
 def amateur_url_for_request_scraping(raw_url):
+    #print ("request scraping url:", raw_url)
     if "/NA1/" in raw_url:
         cut = raw_url.split("#match-details/")[1].split("/")[:-1]
         end = raw_url.split("/")[-1].split("?")[0]
         new_url = "https://acs.leagueoflegends.com/v1/stats/game/" + cut[0] + "/" +  cut[1] + "?visiblePlatformId=NA1&visibleAccountId=" + end
-        return (new_url)
     elif "/EUW1/" in raw_url:
         cut = raw_url.split("#match-details/")[1].split("/")[:-1]
         end = raw_url.split("/")[-1].split("?")[0]
         new_url = "https://acs.leagueoflegends.com/v1/stats/game/" + cut[0] + "/" +  cut[1] + "?visiblePlatformId=EUW1&visibleAccountId=" + end
-        return (new_url)
+    return (new_url)
 
 
 # Parsing 2021 JSON is also probably going to be new.
@@ -151,7 +152,7 @@ def fix_dataframe(dataframe, amateur):
         dataframe["summonerName"] = dataframe["summonerName"].apply(lambda x: positions[x])
         dataframe["win"] = dataframe["summonerName"].apply(lambda x: 1 if x else 0)
     else:
-        bool_list = ["firstbloodassist","firstblood","firstinhibassist","firstinhibkill","firsttowerassist","firsttowerkill"]
+        bool_list = ["firstbloodassist","firstblood","firstinhibkill","firsttowerassist","firsttowerkill"]
         for h in bool_list:
             dataframe[h] = dataframe[h].apply(lambda x: 1 if x else 0)
     return (dataframe)
@@ -221,10 +222,12 @@ def lpl_prune_dataframe(input_raw_dataframe, test):
 ####AMATEUR DATA####
 #Check if url is amateur
 def amateur_check(url):
-    if "ESPORTS" in url:
-        return (False)
-    else:
+    if "/NA1/" in url:
         return (True)
+    elif "/EUW1/" in url:
+        return (True)
+    else:
+        return (False)
 
 def amateur_get_match_data(url, test):
     good_url = amateur_url_for_request_scraping(url)
@@ -256,7 +259,10 @@ def amateur_build_dataframe(input_match_data, test):
         else:
             new_df = pd.DataFrame([stats])
             count = count + 1
-            df = df.append(new_df) 
+            try:
+                df = df.append(new_df) #guessing this is where the summonerName error is coming
+            except Exception as e:
+                print ("amateur build dataframe error:", e) 
     if test == True:
         pprint.pprint(df)
     return(df)
@@ -336,7 +342,8 @@ start_time = time.time()
 for url in urllist:
     if not lpl_check(url):
         try:
-            amateur = amateur_check
+            amateur = amateur_check(url)
+            #print("amateur check result:", amateur)
             if amateur:
                 full_match_data = amateur_get_match_data(url, False) #this has to build the URL differently to get the amateur info
                 long_match_dataframe = amateur_build_dataframe(full_match_data, False) #builds the data with a different value in player
@@ -350,8 +357,9 @@ for url in urllist:
             combine_csv(test_match_file, test_database_file, iteration_count, False)
             iteration_count = iteration_count + 1
         except Exception as e:
+            #print('bad URL', url)
             bad_urllist.append(url)
-            print("non-lpl, pre-2021", e)
+            print("non-lpl", e, "traceback:", traceback.format_exc())
         if iteration_count % 50 == 0:
             print ('iteration_count', iteration_count)
         else:
@@ -366,7 +374,7 @@ for url in urllist:
             combine_csv(lpl_test_match_file, lpl_test_database_file, lpl_iteration_count, False)
             lpl_iteration_count = lpl_iteration_count + 1
         except Exception as e:
-            print("lpl", e)
+            print("lpl", e, "traceback:", traceback.format_exc())
         if iteration_count % 50 == 0:
             print ('lpl_iteration_count', lpl_iteration_count)
         else:
