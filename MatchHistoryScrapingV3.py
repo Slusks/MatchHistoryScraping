@@ -24,7 +24,7 @@ table_headers = full_headers_dict.values()
 def get_urllist():
     l = []
     #url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/data/URL.csv"
-    url_file = r"C:/Users/sam/Desktop/ScrapeTest/all_urls2.csv"
+    url_file = r"C:/Users/sam/Desktop/ScrapeTest/test_url_file.csv"
     file = pd.read_csv(url_file, header=0)
     l = list(file.url)
     single = list(set(l))
@@ -147,10 +147,14 @@ def prune_dataframe(input_raw_dataframe, test):
 
 #This function modifies Boolean values to 1's/0's
 def fix_dataframe(dataframe, amateur):
-    if amateur:
-        positions = {"TOP, SOLO":"top", "MIDDLE, SOLO":"mid", "JUNGLE, NONE":"jng", "BOTTOM, DUO_CARRY":"bot", "BOTTOM, DUO_SUPPORT":"sup"}
-        dataframe["summonerName"] = dataframe["summonerName"].apply(lambda x: positions[x])
-        dataframe["win"] = dataframe["summonerName"].apply(lambda x: 1 if x else 0)
+    if amateur == True:
+        try:
+            positions = {"TOP, SOLO":"top", "MIDDLE, SOLO":"mid", "JUNGLE, NONE":"jng", "BOTTOM, DUO_CARRY":"bot", "BOTTOM, DUO_SUPPORT":"sup"}
+            dataframe["player"] = dataframe["player"].apply(lambda x: positions[x])
+            #dataframe["win"] = dataframe["win"].apply(lambda x: 1 if x else 0)
+        except:
+            print(url)
+            print(dataframe["player"])
     else:
         bool_list = ["firstbloodassist","firstblood","firstinhibkill","firsttowerassist","firsttowerkill"]
         for h in bool_list:
@@ -357,24 +361,26 @@ for url in urllist:
             combine_csv(test_match_file, test_database_file, iteration_count, False)
             iteration_count = iteration_count + 1
         except Exception as e:
-            #print('bad URL', url)
-            bad_urllist.append(url)
-            print("non-lpl", e, "traceback:", traceback.format_exc())
-        if iteration_count % 50 == 0:
+            print("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
+            print(e)
+            print("non-lpl data:", url)
+        if iteration_count != 0 and iteration_count % 50 == 0:
             print ('iteration_count', iteration_count)
         else:
             pass
     elif lpl_check(url):
         try: #this currently works for Pre-2020, non-lpl urls and match data
-            full_match_data = lpl_get_match_data(url, False)
-            long_match_dataframe = lpl_build_dataframe(full_match_data, False)
-            short_match_dataframe = lpl_prune_dataframe(long_match_dataframe, False)
-            short_match_dataframe = short_match_dataframe.rename(columns = lpl_full_headers_dict) #this is returning a dataframe, might need to combine dataframes before dropping to csv for lpl
-            write_to_csv(short_match_dataframe, lpl_test_match_file)
+            lpl_full_match_data = lpl_get_match_data(url, False)
+            lpl_long_match_dataframe = lpl_build_dataframe(lpl_full_match_data, False)
+            lpl_short_match_dataframe = lpl_prune_dataframe(lpl_long_match_dataframe, False)
+            lpl_short_match_dataframe = lpl_short_match_dataframe.rename(columns = lpl_full_headers_dict) #this is returning a dataframe, might need to combine dataframes before dropping to csv for lpl
+            write_to_csv(lpl_short_match_dataframe, lpl_test_match_file)
             combine_csv(lpl_test_match_file, lpl_test_database_file, lpl_iteration_count, False)
             lpl_iteration_count = lpl_iteration_count + 1
         except Exception as e:
-            print("lpl", e, "traceback:", traceback.format_exc())
+            print("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
+            print(e)
+            print('lpl data:', url)
         if iteration_count % 50 == 0:
             print ('lpl_iteration_count', lpl_iteration_count)
         else:
