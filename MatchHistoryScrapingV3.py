@@ -21,10 +21,10 @@ lpl_scrape_headers = lpl_full_headers_dict.keys()
 table_headers = full_headers_dict.values()
 
 #Function that grabs the URL list from a csv
-def get_urllist():
+def get_urllist(csv):
     l = []
     #url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/data/URL.csv"
-    url_file = r"C:/Users/sam/Desktop/ScrapeTest/test_url_file.csv"
+    url_file = csv
     file = pd.read_csv(url_file, header=0)
     l = list(file.url)
     single = list(set(l))
@@ -303,41 +303,27 @@ def lpl_check(url):
     else:
         return(False)
 
-on_Laptop = False
-
-# if on_Laptop:
-#     database_file = r'C:/Users/samsl/Desktop/ScrapeTest/databaseV3.csv'
-#     test_database_file = r'C:/Users/samsl/Desktop/ScrapeTest/test_databaseV3.csv'
-#     temp_file = r'C:/Users/samsl/Desktop/ScrapeTest/scrapeV2.csv'
-
-#     database_file_lpl = r'C:/Users/samsl/Desktop/ScrapeTest/databaseV3_lpl.csv'
-#     test_database_file_lpl = r'C:/Users/samsl/Desktop/ScrapeTest/test_databaseV3_lpl.csv'
-#     temp_file_lpl = r'C:/Users/samsl/Desktop/ScrapeTest/scrapeV2_lpl.csv'
-
-#     master_file = r'C:/Users/samsl/Desktop/ScrapeTest/master_combined_database.csv'
-
-#     error_url_file = r'C:/Users/samsl/Desktop/ScrapeTest/error_url_list.csv'    
-# elif not on_Laptop:
-#     database_file = r'C:/Users/sam/Desktop/ScrapeTest/databaseV3.csv'
-#     test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_databaseV3.csv'
-#     temp_file = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2.csv'
-
-#     database_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/databaseV3_lpl.csv'
-#     test_database_file_lpl = r'C:/Users/samsl/Desktop/ScrapeTest/test_databaseV3_lpl.csv'
-#     temp_file_lpl = r'C:/Users/sam/Desktop/ScrapeTest/scrapeV2_lpl.csv'
-
-#     master_file = r'C:/Users/sam/Desktop/ScrapeTest/master_combined_database.csv'
-
-#     error_url_file = r'C:/Users/sam/Desktop/ScrapeTest/error_url_list.csv'
-
+      
 
 #### RUNNING FILES ##########
-urllist = get_urllist() #raw_urllist #setting this as a variable so i can switch between this and other urllists
-test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test_match_file_V3.csv'
-test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_database_V3.csv'
-lpl_test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_match_file_V3.csv'
-lpl_test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_database_V3.csv'
-error_file = r'C:/Users/sam/Desktop/ScrapeTest/error_urls.csv'
+#urllist = get_urllist() #raw_urllist #setting this as a variable so i can switch between this and other urllists
+on_Laptop = False
+if on_Laptop == False:
+    desktop_url_file = r"C:/Users/sam/Desktop/ScrapeTest/test_url_file.csv"
+    urllist = get_urllist(desktop_url_file)
+    test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test_match_file_V3.csv'
+    test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_database_V3.csv'
+    lpl_test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_match_file_V3.csv'
+    lpl_test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_database_V3.csv'
+    error_file = r'C:/Users/sam/Desktop/ScrapeTest/error_urls.csv'
+else:
+    laptop_url_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/test_url_file.csv'
+    urllist = get_urllist(laptop_url_file)
+    test_match_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/test_match_file_V3.csv'
+    test_database_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/test_database_V3.csv'
+    lpl_test_match_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/lpl_test_match_file_V3.csv'
+    lpl_test_database_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/lpl_test_database_V3.csv'
+    error_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/error_log/error_urls.csv' 
 iteration_count = 0
 lpl_iteration_count = 0
 total_iteration = lpl_iteration_count + iteration_count
