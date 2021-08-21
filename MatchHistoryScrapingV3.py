@@ -343,7 +343,6 @@ else: #These are all of the laptop files
     error_directory = r'C:/Users/samsl/Desktop/ScrapeTest/test/error_log/'
 iteration_count = 0
 lpl_iteration_count = 0
-total_iteration = lpl_iteration_count + iteration_count
 bad_urllist = []
 start_time = time.time()
 for url in urllist:
@@ -393,5 +392,5 @@ with open(error_file, 'w', newline='') as f:
         f.write(i+"\n")
 
 print("Run time:", time.time() - start_time )
-print("records:", total_iteration)
+print("records:", lpl_iteration_count + iteration_count)
 
