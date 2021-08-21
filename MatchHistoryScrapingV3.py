@@ -362,11 +362,11 @@ for url in urllist:
             short_match_dataframe = fix_dataframe(short_match_dataframe, amateur)
             write_to_csv(short_match_dataframe, test_match_file) #does this need to exist or can we just drop the panda dataframes into the CSV?
             combine_csv(test_match_file, test_database_file, iteration_count, False)
-            iteration_count = iteration_count + 1
         except Exception as e:
             print("main exception")
             error_logging(error_directory, e, iteration_count, "main", False)
             bad_urllist.append(url)
+        iteration_count = iteration_count + 1
         if iteration_count != 0 and iteration_count % 50 == 0:
             print ('iteration_count', iteration_count)
         else:
@@ -379,10 +379,10 @@ for url in urllist:
             lpl_short_match_dataframe = lpl_short_match_dataframe.rename(columns = lpl_full_headers_dict) #this is returning a dataframe, might need to combine dataframes before dropping to csv for lpl
             write_to_csv(lpl_short_match_dataframe, lpl_test_match_file)
             combine_csv(lpl_test_match_file, lpl_test_database_file, lpl_iteration_count, False)
-            lpl_iteration_count = lpl_iteration_count + 1
         except Exception as e:
             error_logging(error_directory, url, lpl_iteration_count, "lpl_main", False)
             bad_urllist.append(url)
+        lpl_iteration_count = lpl_iteration_count + 1
         if iteration_count % 50 == 0:
             print ('lpl_iteration_count', lpl_iteration_count)
         else:
@@ -393,5 +393,5 @@ with open(error_file, 'w', newline='') as f:
         f.write(i+"\n")
 
 print("Run time:", time.time() - start_time )
-print("records:", iteration_count + lpl_iteration_count)
+print("records:", total_iteration)
 
