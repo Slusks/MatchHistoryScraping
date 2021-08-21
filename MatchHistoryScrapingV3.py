@@ -100,7 +100,7 @@ for i in champ_name:
 #pprint.pprint(champ_dd.json())
 
 ##PULLING DATA###
-####### Pre 2021, Non-LPL data ######
+####### Professional Non-LPL data ######
 #returns json with full match data
 def get_match_data(url, test):
     good_url = url_for_request_scraping(url)
@@ -152,16 +152,19 @@ def fix_dataframe(dataframe, amateur):
             positions = {"TOP, SOLO":"top", "MIDDLE, SOLO":"mid", "JUNGLE, NONE":"jng", "BOTTOM, DUO_CARRY":"bot", "BOTTOM, DUO_SUPPORT":"sup"}
             dataframe["player"] = dataframe["player"].apply(lambda x: positions[x])
             #dataframe["win"] = dataframe["win"].apply(lambda x: 1 if x else 0)
-        except:
-            print(url)
-            print(dataframe["player"])
+        except Exception as e:
+            error_logging(error_directory, url, "##" , "amateur_dataframe", False)
+            bad_urllist.append(url)
+            #print("fix_dataframe_error: Amateur")
+            #print(url)
+            #print(dataframe["player"])
     else:
         bool_list = ["firstbloodassist","firstblood","firstinhibkill","firsttowerassist","firsttowerkill"]
         for h in bool_list:
             dataframe[h] = dataframe[h].apply(lambda x: 1 if x else 0)
     return (dataframe)
 
-####LPL MODULES###
+#### Professional LPL MODULES###
 def lpl_url_for_request_scraping(raw_url, test):
     base_url = "https://lpl.qq.com/web201612/data/LOL_MATCH_DETAIL_"
     js = ".js"
@@ -303,12 +306,24 @@ def lpl_check(url):
     else:
         return(False)
 
-      
+def error_logging(error_directory, url, count, function, test): #this doesn't actually need the exception in it.
+    log_file = error_directory + str(count) +"_"+ function + ".csv"
+    var = traceback.format_exc()
+    if test == True:
+        print("var:", var)
+    log = open(log_file, 'a')
+    log.write(url+"\n")
+    log.write(var)
+    log.close()
+    #newline=''
+    if type(count) != str:
+        count = count + 1
+    return (var)
 
 #### RUNNING FILES ##########
 #urllist = get_urllist() #raw_urllist #setting this as a variable so i can switch between this and other urllists
-on_Laptop = False
-if on_Laptop == False:
+on_Laptop = True
+if on_Laptop == False: #These are all of the Desktop Files
     desktop_url_file = r"C:/Users/sam/Desktop/ScrapeTest/test_url_file.csv"
     urllist = get_urllist(desktop_url_file)
     test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test_match_file_V3.csv'
@@ -316,7 +331,8 @@ if on_Laptop == False:
     lpl_test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_match_file_V3.csv'
     lpl_test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_database_V3.csv'
     error_file = r'C:/Users/sam/Desktop/ScrapeTest/error_urls.csv'
-else:
+    error_directory = r'C:/Users/sam/Desktop/ScrapeTest/'
+else: #These are all of the laptop files
     laptop_url_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/test_url_file.csv'
     urllist = get_urllist(laptop_url_file)
     test_match_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/test_match_file_V3.csv'
@@ -324,6 +340,7 @@ else:
     lpl_test_match_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/lpl_test_match_file_V3.csv'
     lpl_test_database_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/lpl_test_database_V3.csv'
     error_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/error_log/error_urls.csv' 
+    error_directory = r'C:/Users/samsl/Desktop/ScrapeTest/test/error_log/'
 iteration_count = 0
 lpl_iteration_count = 0
 total_iteration = lpl_iteration_count + iteration_count
@@ -347,9 +364,9 @@ for url in urllist:
             combine_csv(test_match_file, test_database_file, iteration_count, False)
             iteration_count = iteration_count + 1
         except Exception as e:
-            print("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
-            print(e)
-            print("non-lpl data:", url)
+            print("main exception")
+            error_logging(error_directory, e, iteration_count, "main", False)
+            bad_urllist.append(url)
         if iteration_count != 0 and iteration_count % 50 == 0:
             print ('iteration_count', iteration_count)
         else:
@@ -364,17 +381,17 @@ for url in urllist:
             combine_csv(lpl_test_match_file, lpl_test_database_file, lpl_iteration_count, False)
             lpl_iteration_count = lpl_iteration_count + 1
         except Exception as e:
-            print("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
-            print(e)
-            print('lpl data:', url)
+            error_logging(error_directory, url, lpl_iteration_count, "lpl_main", False)
+            bad_urllist.append(url)
         if iteration_count % 50 == 0:
             print ('lpl_iteration_count', lpl_iteration_count)
         else:
             pass
-        
-with open(error_file, 'w+', newline='') as f:
-    write = csv.writer(f)
-    write.writerows(bad_urllist)
+print("bad_urllist: ", bad_urllist)
+
+with open(error_file, 'w', newline='') as f:
+    for i in bad_urllist:
+        f.write(i+"\n")
 
 print("Run time:", time.time() - start_time )
 print("records:", iteration_count + lpl_iteration_count)
