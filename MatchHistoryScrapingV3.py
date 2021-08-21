@@ -41,18 +41,8 @@ def get_urllist(csv):
 #You should be able to use this as the basis for a script that lets you iterate over a 
 # number of URLs for the json files, by replacing the get request with a for loop.
 
-raw_urllist = [
-"https://matchhistory.br.leagueoflegends.com/pt/#match-details/ESPORTSTMNT03/570139?gameHash=ba727c1db6d1cfbb&amp;tab=overview",
-"https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT05/1540037?gameHash=df189f4cefd8bfea&amp;tab=overview",
-"http://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT06/1160644?gameHash=744c3e9779ad519c&amp;tab=overview,Unnamed: 31",
-"https://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT02/660033?gameHash=3ae31e7697461999&amp;tab=overview,False",
-"https://lpl.qq.com/es/stats.shtml?bmid=7325",
-"https://lpl.qq.com/es/stats.shtml?bmid=6909",
-"http://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT03/1632489?gameHash=8a0464cfacf2ff50",
-"http://matchhistory.na.leagueoflegends.com/en/#match-details/ESPORTSTMNT03/1672030?gameHash=d0df39be673c8e95"]
-
-#fixes URL to grab the data json. Needs to be fixed for new 2021 URL format
-#This will only work for non-LPL matches at this time.
+#Converts from Raw URL to URL for JSON formatted data###############################################
+#Note: amateur matches are played on the normal server so they apparently have a different kind of url
 def url_for_request_scraping(raw_url):
     cut = raw_url.split("#match-details/")[1].split("&amp;tab=overview,Unnamed: 31False")[0]
     new_url = "https://acs.leagueoflegends.com/v1/stats/game/"+cut
@@ -67,7 +57,6 @@ def lpl_url_for_request_scraping(raw_url, test):
         pprint.pprint(new_url)
     return (new_url)
 
-#amateur matches are played on the normal server so they apparently have a different kind of url
 def amateur_url_for_request_scraping(raw_url):
     #print ("request scraping url:", raw_url)
     if "/NA1/" in raw_url:
@@ -79,13 +68,12 @@ def amateur_url_for_request_scraping(raw_url):
         end = raw_url.split("/")[-1].split("?")[0]
         new_url = "https://acs.leagueoflegends.com/v1/stats/game/" + cut[0] + "/" +  cut[1] + "?visiblePlatformId=EUW1&visibleAccountId=" + end
     return (new_url)
+####################################################################################################
 
-
-# Parsing 2021 JSON is also probably going to be new.
+#Functions that only need to be run when script is initiated########################################
 
 # Format your cookie into a dictionary form
 user_cookie = dict()
-
 for item in COOKIE.split("; "):
     k, v = item.split("=")
     user_cookie[k] = v
@@ -99,8 +87,8 @@ for i in champ_name:
     champ_key_dict.update({champ_json["data"][i]["key"]:i})
 #pprint.pprint(champ_dd.json())
 
-##PULLING DATA###
-####### Professional Non-LPL data ######
+
+#Professional Non-LPL data #########################################################################
 #returns json with full match data
 def get_match_data(url, test):
     good_url = url_for_request_scraping(url)
@@ -111,6 +99,7 @@ def get_match_data(url, test):
         pprint.pprint(json_content)
     return(json_content)
 
+#returns dataframe
 def build_dataframe(input_match_data, test):
     json_content = input_match_data
     count = 0
@@ -132,7 +121,7 @@ def build_dataframe(input_match_data, test):
         pprint.pprint(df)
     return(df)
 
-#Remove all of the columns that we're not tracking
+#Remove all of the columns that contain data we're not tracking
 def prune_dataframe(input_raw_dataframe, test):
     bad_df = input_raw_dataframe
     all_columns = bad_df.columns.values.tolist()
@@ -145,7 +134,7 @@ def prune_dataframe(input_raw_dataframe, test):
         pprint.pprint(good_df)    
     return (good_df)
 
-#This function modifies Boolean values to 1's/0's
+#Modifies pro and amateur dataframes so the data is the right type/format
 def fix_dataframe(dataframe, amateur):
     if amateur == True:
         try:
@@ -164,7 +153,7 @@ def fix_dataframe(dataframe, amateur):
             dataframe[h] = dataframe[h].apply(lambda x: 1 if x else 0)
     return (dataframe)
 
-#### Professional LPL MODULES###
+#LPL Formatted Modules #############################################################################
 def lpl_url_for_request_scraping(raw_url, test):
     base_url = "https://lpl.qq.com/web201612/data/LOL_MATCH_DETAIL_"
     js = ".js"
@@ -226,7 +215,7 @@ def lpl_prune_dataframe(input_raw_dataframe, test):
     return (good_df)
 #######################################
 
-####AMATEUR DATA####
+#AMATEUR DATA########################################################################################
 #Check if url is amateur
 def amateur_check(url):
     if "/NA1/" in url:
@@ -274,13 +263,12 @@ def amateur_build_dataframe(input_match_data, test):
         pprint.pprint(df)
     return(df)
 
-# Amateur should otherwise reuse the other non-LPL functions
+# Amateur should otherwise reuse the other pro functions
 #prune_dataframe
 #fix_dataframe
+####################################################################################################
 
-####################
-
-### Writing Data 
+#Writing Data to file ############################################################################## 
 #write lists to temp CSV
 def write_to_csv(data_list, output_file):
     dataframe = pd.DataFrame(data_list)
@@ -306,7 +294,7 @@ def lpl_check(url):
     else:
         return(False)
 
-def error_logging(error_directory, url, count, function, test): #this doesn't actually need the exception in it.
+def error_logging(error_directory, url, count, function, test):
     log_file = error_directory + str(count) +"_"+ function + ".csv"
     var = traceback.format_exc()
     if test == True:
@@ -320,8 +308,7 @@ def error_logging(error_directory, url, count, function, test): #this doesn't ac
         count = count + 1
     return (var)
 
-#### RUNNING FILES ##########
-#urllist = get_urllist() #raw_urllist #setting this as a variable so i can switch between this and other urllists
+#Run Script #########################################################################################
 on_Laptop = True
 if on_Laptop == False: #These are all of the Desktop Files
     desktop_url_file = r"C:/Users/sam/Desktop/ScrapeTest/test_url_file.csv"
@@ -349,9 +336,8 @@ for url in urllist:
     if not lpl_check(url):
         try:
             amateur = amateur_check(url)
-            #print("amateur check result:", amateur)
             if amateur:
-                full_match_data = amateur_get_match_data(url, False) #this has to build the URL differently to get the amateur info
+                full_match_data = amateur_get_match_data(url, False)
                 long_match_dataframe = amateur_build_dataframe(full_match_data, False) #builds the data with a different value in player
             else:
                 full_match_data = get_match_data(url, False)
@@ -371,11 +357,11 @@ for url in urllist:
         else:
             pass
     elif lpl_check(url):
-        try: #this currently works for Pre-2020, non-lpl urls and match data
+        try:
             lpl_full_match_data = lpl_get_match_data(url, False)
             lpl_long_match_dataframe = lpl_build_dataframe(lpl_full_match_data, False)
             lpl_short_match_dataframe = lpl_prune_dataframe(lpl_long_match_dataframe, False)
-            lpl_short_match_dataframe = lpl_short_match_dataframe.rename(columns = lpl_full_headers_dict) #this is returning a dataframe, might need to combine dataframes before dropping to csv for lpl
+            lpl_short_match_dataframe = lpl_short_match_dataframe.rename(columns = lpl_full_headers_dict)
             write_to_csv(lpl_short_match_dataframe, lpl_test_match_file)
             combine_csv(lpl_test_match_file, lpl_test_database_file, lpl_iteration_count, False)
         except Exception as e:
