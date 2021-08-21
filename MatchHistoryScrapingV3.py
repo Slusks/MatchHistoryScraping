@@ -387,7 +387,6 @@ for url in urllist:
             print ('lpl_iteration_count', lpl_iteration_count)
         else:
             pass
-print("bad_urllist: ", bad_urllist)
 
 with open(error_file, 'w', newline='') as f:
     for i in bad_urllist:
