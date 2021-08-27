@@ -14,11 +14,12 @@ sys.path.insert(0, 'C:/Users/sam/Desktop/ScrapeTest')
 from cookie_monster import COOKIE
 
 ###Basically, key = scraped value, value = table output value
-full_headers_dict = {"summonerName":"player", "championId": "champion", "magicDamageDealt":"totalmagicdamagedealt", "physicalDamageDealt":"totalphysicaldamagedealt", "physicalDamageTaken":"physicaldamagetaken", "kills":"kills","deaths":"deaths","assists":"assists", 'firstBloodKill': 'firstblood', 'totalDamageDealtToChampions': 'totaldamagetochampions', 'physicalDamageDealtToChampions': 'physicaldamagetochampions', 'magicDamageDealtToChampions': 'magicdamagetochampions', 'trueDamageDealtToChampions': 'truedamagetochampions', 'damageDealtToObjectives': 'totaldamagetoobjectives', 'damageDealtToTurrets': 'totaldamagetoturrets', 'totalHeal': 'damagehealed', 'totalDamageTaken': 'damagetaken', 'magicalDamageTaken': 'magicdamagetaken', 'wardsKilled': 'wardsdestroyed', 'sightWardsBoughtInGame': 'stealthwardspurchased', 'visionWardsBoughtInGame': 'controlwardspurchased', 'totalMinionsKilled': 'minionskilled', 'neutralMinionsKilledTeamJungle': "neutralminionskilledinteam'sjungle", 'neutralMinionsKilledEnemyJungle': 'neutralminionskilledinenemyjungle', 'killingSprees': 'killingsprees', 'longestTimeSpentLiving': 'longesttimespentliving', 'damageSelfMitigated': 'selfmitigateddamage', 'visionScore': 'visionscore', 'timeCCingOthers': 'timeccingothers', 'turretKills': 'totalTurretKills', 'inhibitorKills': 'totalInhibitorKills', 'totalTimeCrowdControlDealt': 'totaltimeapplyingcc', 'firstBloodAssist': 'firstbloodassist', 'firstTowerKill': 'firsttowerkill', 'firstTowerAssist': 'firsttowerassist', 'firstInhibitorKill': 'firstinhibkill', 'doubleKills': 'doublekills', 'tripleKills': 'triplekills', 'quadraKills': 'quadrakills', 'pentaKills': 'pentakills', 'goldEarned':'goldearned', 'goldSpent': 'goldspent', "largestCriticalStrike":"largestcriticalstrike", "largestKillingSpree":"largestkillingspree", "largestMultiKill":"largestmultikill", "teamId":'side', 'gameId':'gameid'}
+full_headers_dict = {"gameVersion":"patch", "summonerName":"player", "championId": "champion", "magicDamageDealt":"totalmagicdamagedealt", "physicalDamageDealt":"totalphysicaldamagedealt", "physicalDamageTaken":"physicaldamagetaken", "kills":"kills","deaths":"deaths","assists":"assists", 'firstBloodKill': 'firstblood', 'totalDamageDealtToChampions': 'totaldamagetochampions', 'physicalDamageDealtToChampions': 'physicaldamagetochampions', 'magicDamageDealtToChampions': 'magicdamagetochampions', 'trueDamageDealtToChampions': 'truedamagetochampions', 'damageDealtToObjectives': 'totaldamagetoobjectives', 'damageDealtToTurrets': 'totaldamagetoturrets', 'totalHeal': 'damagehealed', 'totalDamageTaken': 'damagetaken', 'magicalDamageTaken': 'magicdamagetaken', 'wardsKilled': 'wardsdestroyed', 'sightWardsBoughtInGame': 'stealthwardspurchased', 'visionWardsBoughtInGame': 'controlwardspurchased', 'totalMinionsKilled': 'minionskilled', 'neutralMinionsKilledTeamJungle': "neutralminionskilledinteam'sjungle", 'neutralMinionsKilledEnemyJungle': 'neutralminionskilledinenemyjungle', 'killingSprees': 'killingsprees', 'longestTimeSpentLiving': 'longesttimespentliving', 'damageSelfMitigated': 'selfmitigateddamage', 'visionScore': 'visionscore', 'timeCCingOthers': 'timeccingothers', 'turretKills': 'totalTurretKills', 'inhibitorKills': 'totalInhibitorKills', 'totalTimeCrowdControlDealt': 'totaltimeapplyingcc', 'firstBloodAssist': 'firstbloodassist', 'firstTowerKill': 'firsttowerkill', 'firstTowerAssist': 'firsttowerassist', 'firstInhibitorKill': 'firstinhibkill', 'doubleKills': 'doublekills', 'tripleKills': 'triplekills', 'quadraKills': 'quadrakills', 'pentaKills': 'pentakills', 'goldEarned':'goldearned', 'goldSpent': 'goldspent', "largestCriticalStrike":"largestcriticalstrike", "largestKillingSpree":"largestkillingspree", "largestMultiKill":"largestmultikill", "teamId":'side', 'gameId':'gameid'}
 lpl_full_headers_dict = {"name": "player","hero":"champion","kill":"kills","death":"deaths","assist":"assists",'firstBlood': 'firstblood', 'totalDamageToChamp': 'totaldamagetochampions', 'pDamageToChamp': 'physicaldamagetochampions', 'mDamageDealtToChamp': 'magicdamagetochampions', 'trueDamageDealtToChampions': 'truedamagetochampions', 'damageDealtToObjectives': 'totaldamagetoobjectives', 'damageDealtToTurrets': 'totaldamagetoturrets', 'totalHeal': 'damagehealed', 'totalDamageTaken': 'damagetaken', 'mDamageTaken': 'magicdamagetaken', 'wardsKilled': 'wardsdestroyed', 'sightWardsBoughtInGame': 'stealthwardspurchased', 'visionWardsBought': 'controlwardspurchased', 'lasthit': 'minionskilled', 'neutralKilledTJungle': "neutralminionskilledinteam'sjungle", 'neutralKilledEJungle': 'neutralminionskilledinenemyjungle', 'killingSprees': 'killingsprees', 'longestTimeSpentLiving': 'longesttimespentliving', 'damageSelfMitigated': 'selfmitigateddamage', 'visionScore': 'visionscore', 'timeCCingOthers': 'timeccingothers', 'towerKills': 'totalTurretKills', 'inhibitorKills': 'totalInhibitorKills', 'totalTimeCrowdControlDealt': 'totaltimeapplyingcc', 'firstBloodAssist': 'firstbloodassist', 'firstTowerKill': 'firsttowerkill', 'firstTowerAssist': 'firsttowerassist', 'firstInhibitorKill': 'firstinhibkill', 'firstInhibitorAssist': 'firstinhibassist', 'dKills': 'doublekills', 'tKills': 'triplekills', 'qKills': 'quadrakills', 'pKills': 'pentakills', 'side':'side', 'gold':'goldearned', 'GoldSpent': 'goldspent', "pDamageDealt":"totalphysicaldamagedealt", "pDamageTaken":"physicaldamagetaken", 'mDamageDealt':'totalmagicdamagedealt', 'largestCriticalStrike':'largestcriticalstrike',  "largestKillingSpree":"largestkillingspree", "largestMultiKill":"largestmultikill", 'gameId':'gameid'}
 scrape_headers = full_headers_dict.keys()
 lpl_scrape_headers = lpl_full_headers_dict.keys()
 table_headers = full_headers_dict.values()
+reg = r'^([\w]+.[\w]+)'
 
 #Function that grabs the URL list from a csv
 def get_urllist(csv):
@@ -108,8 +109,9 @@ def build_dataframe(input_match_data, test):
         champion_id = json_content["participants"][count]["championId"]
         champion_name = champ_key_dict[str(champion_id)]
         gameId = json_content["gameId"]
+        patch = re.match(reg, json_content["gameVersion"]).group()
         stats = json_content["participants"][count]["stats"]
-        stats.update({"championId": champion_name , "gameId": gameId, "summonerName":player})
+        stats.update({"championId": champion_name , "gameId": gameId, "summonerName":player, "gameVersion":patch})
         if count == 0:
             df = pd.DataFrame([stats])
             count = count + 1
@@ -247,8 +249,9 @@ def amateur_build_dataframe(input_match_data, test):
         champion_id = json_content["participants"][count]["championId"]
         champion_name = champ_key_dict[str(champion_id)]
         gameId = json_content["gameId"]
+        patch = re.match(reg, json_content["gameVersion"]).group()
         stats = json_content["participants"][count]["stats"]
-        stats.update({"championId": champion_name , "gameId": gameId, "summonerName":player})
+        stats.update({"championId": champion_name , "gameId": gameId, "summonerName":player, "gameVersion":patch})
         if count == 0:
             df = pd.DataFrame([stats])
             count = count + 1
@@ -267,6 +270,13 @@ def amateur_build_dataframe(input_match_data, test):
 #prune_dataframe
 #fix_dataframe
 ####################################################################################################
+
+
+def add_url(dataframe, url):
+    dataframe['url'] = url
+
+
+
 
 #Writing Data to file ############################################################################## 
 #write lists to temp CSV
@@ -345,6 +355,7 @@ for url in urllist:
             short_match_dataframe = prune_dataframe(long_match_dataframe, False)
             short_match_dataframe = short_match_dataframe.rename(columns = full_headers_dict) 
             short_match_dataframe = fix_dataframe(short_match_dataframe, amateur)
+            short_match_dataframe['url'] = url
             write_to_csv(short_match_dataframe, test_match_file) #does this need to exist or can we just drop the panda dataframes into the CSV?
             combine_csv(test_match_file, test_database_file, iteration_count, False)
         except Exception as e:
@@ -362,6 +373,7 @@ for url in urllist:
             lpl_long_match_dataframe = lpl_build_dataframe(lpl_full_match_data, False)
             lpl_short_match_dataframe = lpl_prune_dataframe(lpl_long_match_dataframe, False)
             lpl_short_match_dataframe = lpl_short_match_dataframe.rename(columns = lpl_full_headers_dict)
+            lpl_short_match_dataframe['url'] = url
             write_to_csv(lpl_short_match_dataframe, lpl_test_match_file)
             combine_csv(lpl_test_match_file, lpl_test_database_file, lpl_iteration_count, False)
         except Exception as e:
