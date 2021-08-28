@@ -1,6 +1,7 @@
 import requests
 import re
 import sys
+import os
 from requests.auth import HTTPBasicAuth
 import time
 import pandas as pd
@@ -109,7 +110,10 @@ def build_dataframe(input_match_data, test):
         champion_id = json_content["participants"][count]["championId"]
         champion_name = champ_key_dict[str(champion_id)]
         gameId = json_content["gameId"]
-        patch = re.match(reg, json_content["gameVersion"]).group()
+        try:
+            patch = re.match(reg, json_content["gameVersion"]).group()
+        except:
+            patch = "Unrecorded"
         stats = json_content["participants"][count]["stats"]
         stats.update({"championId": champion_name , "gameId": gameId, "summonerName":player, "gameVersion":patch})
         if count == 0:
@@ -140,8 +144,8 @@ def prune_dataframe(input_raw_dataframe, test):
 def fix_dataframe(dataframe, amateur):
     if amateur == True:
         try:
-            positions = {"TOP, SOLO":"top", "MIDDLE, SOLO":"mid", "JUNGLE, NONE":"jng", "BOTTOM, DUO_CARRY":"bot", "BOTTOM, DUO_SUPPORT":"sup"}
-            dataframe["player"] = dataframe["player"].apply(lambda x: positions[x])
+            positions = {"TOP, SOLO":"top", "MIDDLE, SOLO":"mid", "JUNGLE, NONE":"jng", "BOTTOM, DUO_CARRY":"bot", "BOTTOM, DUO_SUPPORT":"sup"}#, 'MIDDLE, DUO': 'FLEX', 'BOTTOM, DUO': 'FLEX', 'MIDDLE, DUO_SUPPORT':'FLEX'}
+            dataframe["player"] = dataframe["player"].apply(lambda x: positions[x] if x in positions else 'flex') #.apply(lambda x: positions[x]) #this probably needs to be more complex/robust
             #dataframe["win"] = dataframe["win"].apply(lambda x: 1 if x else 0)
         except Exception as e:
             error_logging(error_directory, url, "##" , "amateur_dataframe", False)
@@ -158,9 +162,8 @@ def fix_dataframe(dataframe, amateur):
 #LPL Formatted Modules #############################################################################
 def lpl_url_for_request_scraping(raw_url, test):
     base_url = "https://lpl.qq.com/web201612/data/LOL_MATCH_DETAIL_"
-    js = ".js"
-    match_num = raw_url[-4:]
-    new_url = base_url + match_num + js
+    match_num = raw_url.split('=')[1] #raw_url[-4:]
+    new_url = base_url + match_num + ".js"
     if test == True:
         pprint.pprint(new_url)
     return (new_url)
@@ -249,7 +252,10 @@ def amateur_build_dataframe(input_match_data, test):
         champion_id = json_content["participants"][count]["championId"]
         champion_name = champ_key_dict[str(champion_id)]
         gameId = json_content["gameId"]
-        patch = re.match(reg, json_content["gameVersion"]).group()
+        try:
+            patch = re.match(reg, json_content["gameVersion"]).group()
+        except:
+            patch = "Unrecorded"
         stats = json_content["participants"][count]["stats"]
         stats.update({"championId": champion_name , "gameId": gameId, "summonerName":player, "gameVersion":patch})
         if count == 0:
@@ -270,14 +276,6 @@ def amateur_build_dataframe(input_match_data, test):
 #prune_dataframe
 #fix_dataframe
 ####################################################################################################
-
-
-def add_url(dataframe, url):
-    dataframe['url'] = url
-
-
-
-
 #Writing Data to file ############################################################################## 
 #write lists to temp CSV
 def write_to_csv(data_list, output_file):
@@ -310,7 +308,7 @@ def error_logging(error_directory, url, count, function, test):
     if test == True:
         print("var:", var)
     log = open(log_file, 'a')
-    log.write(url+"\n")
+    log.write(url+" \n")
     log.write(var)
     log.close()
     #newline=''
@@ -319,17 +317,19 @@ def error_logging(error_directory, url, count, function, test):
     return (var)
 
 #Run Script #########################################################################################
-on_Laptop = True
-if on_Laptop == False: #These are all of the Desktop Files
-    desktop_url_file = r"C:/Users/sam/Desktop/ScrapeTest/test_url_file.csv"
+on_Laptop = os.path.exists(r'C:/Users/samsl/') #Checks if we're on my laptop or Desktop
+#These are all of the Desktop Files
+if on_Laptop == False:
+    desktop_url_file = r"C:/Users/sam/Desktop/ScrapeTest/test/test_url_file.csv"
     urllist = get_urllist(desktop_url_file)
-    test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test_match_file_V3.csv'
-    test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test_database_V3.csv'
-    lpl_test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_match_file_V3.csv'
-    lpl_test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/lpl_test_database_V3.csv'
-    error_file = r'C:/Users/sam/Desktop/ScrapeTest/error_urls.csv'
-    error_directory = r'C:/Users/sam/Desktop/ScrapeTest/'
-else: #These are all of the laptop files
+    test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test/test_match_file_V3.csv'
+    test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/test_database_V3.csv'
+    lpl_test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test/lpl_test_match_file_V3.csv'
+    lpl_test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/lpl_test_database_V3.csv'
+    error_file = r'C:/Users/sam/Desktop/ScrapeTest/test/error_urls.csv'
+    error_directory = r'C:/Users/sam/Desktop/ScrapeTest/test/ErrorLog/'
+#These are all of the Laptop files
+else: 
     laptop_url_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/test_url_file.csv'
     urllist = get_urllist(laptop_url_file)
     test_match_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/test_match_file_V3.csv'
