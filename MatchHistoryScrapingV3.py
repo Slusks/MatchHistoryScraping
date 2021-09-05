@@ -318,16 +318,27 @@ def error_logging(error_directory, url, count, function, test):
 
 #Run Script #########################################################################################
 on_Laptop = os.path.exists(r'C:/Users/samsl/') #Checks if we're on my laptop or Desktop
+testing = False
 #These are all of the Desktop Files
 if on_Laptop == False:
-    desktop_url_file = r"C:/Users/sam/Desktop/ScrapeTest/test/test_url_file.csv"
-    urllist = get_urllist(desktop_url_file)
-    test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test/test_match_file_V3.csv'
-    test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/test_database_V3.csv'
-    lpl_test_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test/lpl_test_match_file_V3.csv'
-    lpl_test_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/lpl_test_database_V3.csv'
-    error_file = r'C:/Users/sam/Desktop/ScrapeTest/test/error_urls.csv'
-    error_directory = r'C:/Users/sam/Desktop/ScrapeTest/test/ErrorLog/'
+    if testing == True:
+        desktop_url_file = r"C:/Users/sam/Desktop/ScrapeTest/test/test_url_file.csv"
+        urllist = get_urllist(desktop_url_file)
+        match_file = r'C:/Users/sam/Desktop/ScrapeTest/test/test_match_file_V3.csv'
+        database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/test_database_V3.csv'
+        lpl_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test/lpl_test_match_file_V3.csv'
+        lpl_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/lpl_test_database_V3.csv'
+        error_file = r'C:/Users/sam/Desktop/ScrapeTest/test/ErrorLog/error_urls.csv'
+        error_directory = r'C:/Users/sam/Desktop/ScrapeTest/test/ErrorLog/'
+    elif testing == False:
+        desktop_url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/data/all_url.csv"
+        urllist = get_urllist(desktop_url_file)
+        match_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/prod_match_file_V3.csv'
+        database_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/prod_database_V3.csv'
+        lpl_match_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/lpl_prod_match_file_V3.csv'
+        lpl_database_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/lpl_prod_database_V3.csv'
+        error_file = r'C:/Users/sam/Desktop/ScrapeTest/test/ErrorLog/error_urls.csv'
+        error_directory = r'C:/Users/sam/Desktop/ScrapeTest/test/ErrorLog/'
 #These are all of the Laptop files
 else: 
     laptop_url_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/test_url_file.csv'
@@ -356,11 +367,11 @@ for url in urllist:
             short_match_dataframe = short_match_dataframe.rename(columns = full_headers_dict) 
             short_match_dataframe = fix_dataframe(short_match_dataframe, amateur)
             short_match_dataframe['url'] = url
-            write_to_csv(short_match_dataframe, test_match_file) #does this need to exist or can we just drop the panda dataframes into the CSV?
-            combine_csv(test_match_file, test_database_file, iteration_count, False)
+            write_to_csv(short_match_dataframe, match_file) #does this need to exist or can we just drop the panda dataframes into the CSV?
+            combine_csv(match_file, database_file, iteration_count, False)
         except Exception as e:
             print("main exception")
-            error_logging(error_directory, e, iteration_count, "main", False)
+            error_logging(error_directory, e, iteration_count, "main", True)
             bad_urllist.append(url)
         iteration_count = iteration_count + 1
         if iteration_count != 0 and iteration_count % 50 == 0:
@@ -374,10 +385,10 @@ for url in urllist:
             lpl_short_match_dataframe = lpl_prune_dataframe(lpl_long_match_dataframe, False)
             lpl_short_match_dataframe = lpl_short_match_dataframe.rename(columns = lpl_full_headers_dict)
             lpl_short_match_dataframe['url'] = url
-            write_to_csv(lpl_short_match_dataframe, lpl_test_match_file)
-            combine_csv(lpl_test_match_file, lpl_test_database_file, lpl_iteration_count, False)
+            write_to_csv(lpl_short_match_dataframe, lpl_match_file)
+            combine_csv(lpl_match_file, lpl_database_file, lpl_iteration_count, False)
         except Exception as e:
-            error_logging(error_directory, url, lpl_iteration_count, "lpl_main", False)
+            error_logging(error_directory, url, lpl_iteration_count, "lpl_main", True)
             bad_urllist.append(url)
         lpl_iteration_count = lpl_iteration_count + 1
         if iteration_count % 50 == 0:
