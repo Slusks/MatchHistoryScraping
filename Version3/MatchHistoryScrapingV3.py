@@ -333,6 +333,7 @@ if on_Laptop == False:
         amateur_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/test_amateur_database_V3.csv'
         lpl_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test/lpl_test_match_file_V3.csv'
         lpl_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/lpl_test_database_V3.csv'
+        lpl_2016_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/lpl_2016_test_database_V3.csv'
     elif testing == False:
         desktop_url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/Version3/all_url.csv"
         urllist = get_urllist(desktop_url_file)
@@ -342,6 +343,7 @@ if on_Laptop == False:
         database_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/prod_database_V3.csv'
         lpl_match_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/lpl_prod_match_file_V3.csv'
         lpl_database_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/lpl_prod_database_V3.csv'
+        lpl_2016_database_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/lpl_2016_prod_database_V3.csv'
     error_file = r'C:/Users/sam/Desktop/ScrapeTest/test/ErrorLog/error_urls.csv'#Note that this is still in the test folder
     error_directory = r'C:/Users/sam/Desktop/ScrapeTest/test/ErrorLog/' #Note that this is still in the test folder
 #These are all of the Laptop files
