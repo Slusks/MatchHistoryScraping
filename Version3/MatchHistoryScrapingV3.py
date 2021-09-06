@@ -156,7 +156,10 @@ def fix_dataframe(dataframe, amateur):
     else:
         bool_list = ["firstbloodassist","firstblood","firstinhibkill","firsttowerassist","firsttowerkill"]
         for h in bool_list:
-            dataframe[h] = dataframe[h].apply(lambda x: 1 if x else 0)
+            try:
+                dataframe[h] = dataframe[h].apply(lambda x: 1 if x else 0)
+            except:
+                print(h, "is wrong")
     return (dataframe)
 
 #LPL Formatted Modules #############################################################################
@@ -326,12 +329,16 @@ if on_Laptop == False:
         urllist = get_urllist(desktop_url_file)
         match_file = r'C:/Users/sam/Desktop/ScrapeTest/test/test_match_file_V3.csv'
         database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/test_database_V3.csv'
+        amateur_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test/test_amateur_match_file_V3.csv'
+        amateur_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/test_amateur_database_V3.csv'
         lpl_match_file = r'C:/Users/sam/Desktop/ScrapeTest/test/lpl_test_match_file_V3.csv'
         lpl_database_file = r'C:/Users/sam/Desktop/ScrapeTest/test/lpl_test_database_V3.csv'
     elif testing == False:
         desktop_url_file = r"F:/LeagueStats/scraping/MatchHistoryScraping/Version3/all_url.csv"
         urllist = get_urllist(desktop_url_file)
         match_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/prod_match_file_V3.csv'
+        amateur_database_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/prod_amateur_database_V3.csv'
+        amateur_match_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/prod_amateur_match_file_V3.csv'
         database_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/prod_database_V3.csv'
         lpl_match_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/lpl_prod_match_file_V3.csv'
         lpl_database_file = r'C:/Users/sam/Desktop/ScrapeTest/prod/lpl_prod_database_V3.csv'
@@ -345,6 +352,7 @@ else:
     database_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/test_database_V3.csv'
     lpl_match_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/lpl_test_match_file_V3.csv'
     lpl_database_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/lpl_test_database_V3.csv'
+    lpl_2016_database_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/lpl_2016_test_database_V3.csv'
     error_file = r'C:/Users/samsl/Desktop/ScrapeTest/test/error_log/error_urls.csv' 
     error_directory = r'C:/Users/samsl/Desktop/ScrapeTest/test/error_log/'
 iteration_count = 0
@@ -358,18 +366,24 @@ for url in urllist:
             if amateur:
                 full_match_data = amateur_get_match_data(url, False)
                 long_match_dataframe = amateur_build_dataframe(full_match_data, False) #builds the data with a different value in player
+                short_match_dataframe = prune_dataframe(long_match_dataframe, False)
+                short_match_dataframe = short_match_dataframe.rename(columns = full_headers_dict) 
+                short_match_dataframe = fix_dataframe(short_match_dataframe, amateur)
+                short_match_dataframe['url'] = url
+                write_to_csv(short_match_dataframe, amateur_match_file) #does this need to exist or can we just drop the panda dataframes into the CSV?
+                combine_csv(amateur_match_file, amateur_database_file, iteration_count, False)
             else:
                 full_match_data = get_match_data(url, False)
                 long_match_dataframe = build_dataframe(full_match_data, False)
-            short_match_dataframe = prune_dataframe(long_match_dataframe, False)
-            short_match_dataframe = short_match_dataframe.rename(columns = full_headers_dict) 
-            short_match_dataframe = fix_dataframe(short_match_dataframe, amateur)
-            short_match_dataframe['url'] = url
-            write_to_csv(short_match_dataframe, match_file) #does this need to exist or can we just drop the panda dataframes into the CSV?
-            combine_csv(match_file, database_file, iteration_count, False)
+                short_match_dataframe = prune_dataframe(long_match_dataframe, False)
+                short_match_dataframe = short_match_dataframe.rename(columns = full_headers_dict) 
+                short_match_dataframe = fix_dataframe(short_match_dataframe, amateur)
+                short_match_dataframe['url'] = url
+                write_to_csv(short_match_dataframe, match_file) #does this need to exist or can we just drop the panda dataframes into the CSV?
+                combine_csv(match_file, database_file, iteration_count, False)
         except Exception as e:
             print("main exception")
-            error_logging(error_directory, url, e, iteration_count, "main", True)
+            error_logging(error_directory, url, iteration_count, "main", True)
             bad_urllist.append(url)
         iteration_count = iteration_count + 1
         if iteration_count != 0 and iteration_count % 50 == 0:
@@ -383,8 +397,12 @@ for url in urllist:
             lpl_short_match_dataframe = lpl_prune_dataframe(lpl_long_match_dataframe, False)
             lpl_short_match_dataframe = lpl_short_match_dataframe.rename(columns = lpl_full_headers_dict)
             lpl_short_match_dataframe['url'] = url
-            write_to_csv(lpl_short_match_dataframe, lpl_match_file)
-            combine_csv(lpl_match_file, lpl_database_file, lpl_iteration_count, False)
+            if len(lpl_short_match_dataframe.columns) == 26:
+                write_to_csv(lpl_short_match_dataframe, lpl_match_file)
+                combine_csv(lpl_match_file, lpl_2016_database_file, lpl_iteration_count, False)
+            else:
+                write_to_csv(lpl_short_match_dataframe, lpl_match_file)
+                combine_csv(lpl_match_file, lpl_database_file, lpl_iteration_count, False)
         except Exception as e:
             error_logging(error_directory, url, lpl_iteration_count, "lpl_main", True)
             bad_urllist.append(url)
