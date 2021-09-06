@@ -156,10 +156,7 @@ def fix_dataframe(dataframe, amateur):
     else:
         bool_list = ["firstbloodassist","firstblood","firstinhibkill","firsttowerassist","firsttowerkill"]
         for h in bool_list:
-            try:
-                dataframe[h] = dataframe[h].apply(lambda x: 1 if x else 0)
-            except:
-                print(h, "is wrong")
+            dataframe[h] = dataframe[h].apply(lambda x: 1 if x else 0)
     return (dataframe)
 
 #LPL Formatted Modules #############################################################################
