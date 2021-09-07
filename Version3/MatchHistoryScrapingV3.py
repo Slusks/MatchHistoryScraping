@@ -64,11 +64,14 @@ def amateur_url_for_request_scraping(raw_url):
     if "/NA1/" in raw_url:
         cut = raw_url.split("#match-details/")[1].split("/")[:-1]
         end = raw_url.split("/")[-1].split("?")[0]
-        new_url = "https://acs.leagueoflegends.com/v1/stats/game/" + cut[0] + "/" +  cut[1] + "?visiblePlatformId=NA1&visibleAccountId=" + end
+        try:
+            new_url = "https://acs.leagueoflegends.com/v1/stats/game/" + cut[0] + "/" +  cut[1] + "?visiblePlatformId=NA1&visibleAccountId=" + end
+        except:
+            new_url = "https://acs.leagueoflegends.com/v1/stats/game/" + cut[0] + "/" +  end
     elif "/EUW1/" in raw_url:
         cut = raw_url.split("#match-details/")[1].split("/")[:-1]
         end = raw_url.split("/")[-1].split("?")[0]
-        new_url = "https://acs.leagueoflegends.com/v1/stats/game/" + cut[0] + "/" +  cut[1] + "?visiblePlatformId=EUW1&visibleAccountId=" + end
+        new_url = "https://acs.leagueoflegends.com/v1/stats/game/" + cut[0] + "/" + end
     return (new_url)
 ####################################################################################################
 
@@ -387,6 +390,7 @@ for url in urllist:
         iteration_count = iteration_count + 1
         if iteration_count != 0 and iteration_count % 50 == 0:
             print ('iteration_count', iteration_count)
+            print("Run time:", (time.time() - start_time)/60, " min" )
         else:
             pass
     elif lpl_check(url):
@@ -408,6 +412,7 @@ for url in urllist:
         lpl_iteration_count = lpl_iteration_count + 1
         if iteration_count % 50 == 0:
             print ('lpl_iteration_count', lpl_iteration_count)
+            print("Run time:", (time.time() - start_time)/60, " min" )
         else:
             pass
 
